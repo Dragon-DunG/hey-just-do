@@ -85,19 +85,28 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void participate() {
-    int updatedEntryCount = (entryCount ?? 0) + 1;
     final missionsCollectionReference = FirebaseFirestore.instance.collection("missions");
 
-    missionsCollectionReference.doc(currentId).update({
-      'entryCount': updatedEntryCount,
-    }).then((value) {
-      setState(() {
-        entryCount = updatedEntryCount;
-      });
+    missionsCollectionReference.doc(currentId).get().then((documentSnapshot) {
+      if (documentSnapshot.exists) {
+        entryCount = documentSnapshot.data()?['entryCount'] ?? 0;
+        missionsCollectionReference.doc(currentId).update({
+          'entryCount': FieldValue.increment(1),
+        }).then((value) {
+          setState(() {
+            entryCount = (entryCount ?? 0) + 1;
+          });
+        }).catchError((error) {
+          print("Failed to update entryCount: $error");
+        });
+      } else {
+        print("Document does not exist");
+      }
     }).catchError((error) {
-      print("Failed to update entryCount: $error");
+      print("Failed to get current entryCount: $error");
     });
-  }
+    }
+
 
 
   @override
