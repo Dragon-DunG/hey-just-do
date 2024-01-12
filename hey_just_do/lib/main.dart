@@ -1,3 +1,4 @@
+import 'dart:html' as html;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -34,12 +35,30 @@ class _MainScreenState extends State<MainScreen> {
   String? currentId;
   String? mission;
   int? entryCount;
+  int userEntryCount = 0;
 
   @override
   void initState() {
     super.initState();
+    _loadUserEntryCount();
     readData();
   }
+
+  void _loadUserEntryCount() {
+    final cookieString = html.window.document.cookie;
+   final storedEntryCount = cookieString?.split(';')
+        .firstWhere((cookie) => cookie.trim().startsWith('userEntryCount='),
+    orElse: () => '')
+        .split('=')
+        .last;
+
+   if (storedEntryCount != null && storedEntryCount.isNotEmpty) {
+     setState(() {
+       userEntryCount = int.parse(storedEntryCount);
+     });
+   }
+  }
+
 
   void readData() {
     final missionsCollectionReference = FirebaseFirestore.instance.collection("missions");
@@ -94,8 +113,12 @@ class _MainScreenState extends State<MainScreen> {
           'entryCount': FieldValue.increment(1),
         }).then((value) {
           setState(() {
+            userEntryCount++;
             entryCount = (entryCount ?? 0) + 1;
           });
+          final expirationDate = DateTime.now().add(Duration(days: 100));
+          html.window.document.cookie = 'userEntryCount=$userEntryCount;expires=$expirationDate';
+
         }).catchError((error) {
           print("Failed to update entryCount: $error");
         });
@@ -136,6 +159,11 @@ class _MainScreenState extends State<MainScreen> {
               children: [ElevatedButton(onPressed: getNextData, child: Text('갱신'),),
                 SizedBox(width: 16,),
                 ElevatedButton(onPressed: participate, child: Text('미션 시작'),),],
+            ),
+            SizedBox(height: 20),
+            Text(
+              "$userEntryCount번째 그냥해",
+              style: TextStyle(fontSize: 16),
             )
 
           ],
