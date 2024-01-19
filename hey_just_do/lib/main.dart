@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hey_just_do/firebase_options.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -129,8 +128,6 @@ class _MainScreenState extends State<MainScreen> {
       print("Failed to get current entryCount: $error");
     });
     }
-
-
 
   @override
   Widget build(BuildContext context) {
