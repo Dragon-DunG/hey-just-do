@@ -3,7 +3,7 @@ name: Deploy Flutter Web App to GitHub Pages
 on:
   push:
     branches:
-      - main  # 또는 Flutter 앱의 소스 코드가 있는 브랜치 이름
+      - gh-pages  # 또는 Flutter 앱의 소스 코드가 있는 브랜치 이름
 
 jobs:
   build-and-deploy:
