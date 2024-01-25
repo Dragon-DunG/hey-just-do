@@ -117,7 +117,7 @@
         <entry key="flutter">
           <value>
             <list>
-              <option value="$USER_HOME$/flutter/packages/flutter/lib" />
+              <option value="$PROJECT_DIR$/../../flutter/flutter_windows_3.16.5-stable/flutter/packages/flutter/lib" />
             </list>
           </value>
         </entry>
@@ -187,14 +187,14 @@
         <entry key="material_color_utilities">
           <value>
             <list>
-              <option value="$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.dev/material_color_utilities-0.8.0/lib" />
+              <option value="$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.dev/material_color_utilities-0.5.0/lib" />
             </list>
           </value>
         </entry>
         <entry key="meta">
           <value>
             <list>
-              <option value="$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.dev/meta-1.11.0/lib" />
+              <option value="$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.dev/meta-1.10.0/lib" />
             </list>
           </value>
         </entry>
@@ -215,7 +215,7 @@
         <entry key="sky_engine">
           <value>
             <list>
-              <option value="$USER_HOME$/flutter/bin/cache/pkg/sky_engine/lib" />
+              <option value="$PROJECT_DIR$/../../flutter/flutter_windows_3.16.5-stable/flutter/bin/cache/pkg/sky_engine/lib" />
             </list>
           </value>
         </entry>
