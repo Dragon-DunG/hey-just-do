@@ -17,3 +17,14 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  fonts:
+    - family: PreBd
+      fonts:
+        - asset: assets/font/Pretendard-Bold.otf
+    - family: PreRg
+      fonts:
+        - asset: assets/font/Pretendard-Regular.otf
+    - family: Gangwon
+      fonts:
+        - asset: assets/font/GangwonStrong.ttf
