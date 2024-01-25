@@ -261,7 +261,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                                 ElevatedButton(
                                                     onPressed: (){
                                                       setState(() {
-                                                        _1pText1 = '카톡 작동중';
+                                                        _1pText1 = '카톡 작동예정';
                                                       });
                                                     },
                                                     style: ElevatedButton.styleFrom(
