@@ -274,7 +274,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                                 ElevatedButton(
                                                     onPressed: (){
                                                       setState(() {
-                                                        _1pText1 = '트위터 작동중';
+                                                        _1pText1 = '트위터 작동예정!';
                                                       });
                                                     },
                                                     style: ElevatedButton.styleFrom(
