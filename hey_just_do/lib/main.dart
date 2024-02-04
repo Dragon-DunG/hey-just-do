@@ -1,16 +1,92 @@
 import 'dart:async';
-import 'dart:math' as math;
 import 'dart:html' as html;
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hey_just_do/firebase_options.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk_share.dart';
+import 'package:flutter/services.dart';
+
+final FeedTemplate defaultFeed = FeedTemplate(
+  content: Content(
+    title: '친구가 첫 번째 그냥해!를 시작했어요🌞',
+    imageUrl: Uri.parse(
+        'https://mud-kage.kakao.com/dn/Q2iNx/btqgeRgV54P/VLdBs9cvyn8BJXB3o7N8UK/kakaolink40_original.png'),
+    description: '어떤 해!인지 확인해볼까요?',
+    link: Link(
+        webUrl: Uri.parse('https://developers.kakao.com'),
+        mobileWebUrl: Uri.parse('https://developers.kakao.com')),
+  ),
+  buttons: [
+    Button(
+      title: '확인하기',
+      link: Link(
+        webUrl: Uri.parse('https: //developers.kakao.com'),
+        mobileWebUrl: Uri.parse('https: //developers.kakao.com'),
+      ),
+    ),
+  ],
+);
+
+TimeOfDay getCurrentTime() {
+  final DateTime now = DateTime.now();
+  return TimeOfDay(hour: now.hour, minute: now.minute);
+}
+
+class DynamicTheme {
+
+  static ThemeData getTheme() {
+    final currentTime = getCurrentTime();
+    // 오전 6시부터 저녁 5시 59분까지는 라이트 모드
+    if (currentTime.hour >= 6 && currentTime.hour < 18) {
+      return lightTheme;
+    } else {
+      // 나머지 시간은 다크 모드
+      return darkTheme;
+    }
+  }
+
+  static ThemeData toggleTheme(){
+    if(getTheme() == darkTheme){return lightTheme;}
+    else {return darkTheme;}
+  }
+
+  static final lightTheme = ThemeData(
+    fontFamily: 'PreRg',
+    colorScheme: const ColorScheme.light(
+      background: Colors.white,
+      primary: Color(0xFFFF9737),
+      secondary: Colors.black,
+      tertiary: Colors.black54,
+      onPrimary: Colors.white,
+      onBackground:Colors.black,
+      onSecondary: Colors.white,
+    ));
+
+  static final darkTheme = ThemeData(
+  colorScheme: const ColorScheme.dark(
+      background: Color(0xFF44576E),
+      primary: Color(0xFFECECEC),
+  secondary: Colors.white,
+  tertiary: Colors.white60,
+  onBackground: Colors.white,
+  onPrimary: Colors.black,
+  onSecondary: Color(0xFF44576E),
+  ));
+}
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
+  );
+  KakaoSdk.init(
+    javaScriptAppKey: 'a45ef9643128ef4def000227b1e86c8a'
   );
   runApp(const MainApp());
 }
@@ -21,11 +97,11 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      builder: FToastBuilder(),
       title: 'heyjustdo',
-      theme: ThemeData(
-        fontFamily: 'PreRg'
-      ),
+      theme: DynamicTheme.getTheme(),
       home: MyHomePage(),
+      // themeMode: ThemeMode.dark,
     );
   }
 }
@@ -38,6 +114,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
+  FToast fToast = FToast();
   String feedbackText = '';
   String? currentId;
   String? todayMission;
@@ -53,14 +131,42 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _mission2 = false;
   bool _text42 = true;
   var BelowPadding = 0.12;
-  var now = new DateTime.now();
-  //String formatDate = DateFormat('yy/MM/dd - HH:mm:ss').format(now);
+
+  String shareText = '친구가 첫 번째 그냥해!를 시작했어요🌞\n어떤 해!인지 확인해볼까요?\n';
+  final String appLink = 'hey-just-do.vercel.app';
 
   @override
   void initState() {
     super.initState();
     _loadUserEntryCount();
     readData();
+    fToast.init(context);
+  }
+
+  _showToast(String message) {
+    Widget toast = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(25.0),
+        color: Theme.of(context).colorScheme.primary,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.sunny, color: Theme.of(context).colorScheme.onPrimary),
+          SizedBox(
+            width: 12.0,
+          ),
+          Text(message, style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),),
+        ],
+      ),
+    );
+
+    fToast.showToast(
+      child: toast,
+      gravity: ToastGravity.BOTTOM,
+      toastDuration: Duration(seconds: 2),
+    );
   }
 
   void _loadUserEntryCount() {
@@ -133,6 +239,9 @@ class _MyHomePageState extends State<MyHomePage> {
         }).then((value) {
           setState(() {
             userEntryCount++;
+            if(userEntryCount > 1) {
+              shareText = '친구가 $userEntryCount번째 그냥해!를 시작했어요🌞\n 어떤 해!인지 확인해볼까요?\n';
+            }
             entryCount = (entryCount ?? 0) + 1;
           });
           final expirationDate = DateTime.now().add(Duration(days: 100));
@@ -149,12 +258,59 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  // double screenHeight = MediaQuery.of(context).size.height;  // 화면 높이
+  void shareOnTwitter() async {
+    Uri tweetUrl = Uri.parse('https://twitter.com/intent/tweet?text=$shareText&url=$appLink');
+
+    if (!await launchUrl(tweetUrl)) {
+      throw Exception('Could not launch twitter');
+    }
+  }
+
+  void shareOnKakao() async {
+    // 카카오톡 실행 가능 여부 확인
+    bool isKakaoTalkSharingAvailable = await ShareClient.instance.isKakaoTalkSharingAvailable();
+
+    if (isKakaoTalkSharingAvailable) {
+      try {
+        Uri uri =
+        await ShareClient.instance.shareDefault(template: defaultFeed);
+        await ShareClient.instance.launchKakaoTalk(uri);
+        print('카카오톡 공유 완료');
+      } catch (error) {
+        print('카카오톡 공유 실패 $error');
+      }
+    } else {
+      try {
+        Uri shareUrl = await WebSharerClient.instance
+            .makeDefaultUrl(template: defaultFeed);
+        await launchBrowserTab(shareUrl, popupOpen: true);
+      } catch (error) {
+        print('카카오톡 공유 실패 $error');
+      }
+    }
+  }
+
+  Future<void> shareClipBoard() async {
+    await Clipboard.setData(ClipboardData(text: '$shareText$appLink'));
+    _showToast("클립보드에 복사되었어요.");
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final now = DateTime.now();
+    final remainingTime = DateTime(now.year, now.month, now.day + 1) // 다음날 00:00
+        .difference(now);
 
+    final hours = remainingTime.inHours;
+    final minutes = (remainingTime.inMinutes % 60).toString().padLeft(2, '0');
+    final seconds = (remainingTime.inSeconds % 60).toString().padLeft(2, '0');
+    final timeText = '$hours:$minutes:$seconds';
+
+    Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {});
+    });
+
+    return Scaffold(
         body: Container(
             height: MediaQuery.of(context).size.height,
             child: Stack(
@@ -167,7 +323,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         left: MediaQuery.of(context).size.width * 0.2,
                         right: MediaQuery.of(context).size.width * 0.2
                     ),
-                    width : MediaQuery.of(context).size.width / 1.5, height : MediaQuery.of(context).size.width / 1.5, decoration: BoxDecoration(color: Colors.orange,shape: BoxShape.circle,),),
+                    width : MediaQuery.of(context).size.width / 1.5,
+                    height : MediaQuery.of(context).size.width / 1.5,
+                    decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary,shape: BoxShape.circle,),),
                   //click 버튼 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                   Container(
                       margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.4 - 200.0),
@@ -186,7 +344,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               });
                             },
                             style: TextButton.styleFrom(
-                              foregroundColor: Colors.black, // 한번 눌러서 보라색으로 변한 글자/색상 변경
+                              foregroundColor: Theme.of(context).colorScheme.onPrimary, // 한번 눌러서 보라색으로 변한 글자/색상 변경
                               textStyle: const TextStyle(
                                 fontFamily: "Gangwon",
                                 fontSize: 30.0,
@@ -211,9 +369,9 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                           child: Column(
                             children: [
-                              Text(_1pText1, textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreBd", fontSize: 20, color: Colors.black,),),
+                              Text(_1pText1, textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreBd", fontSize: 20, color: Theme.of(context).colorScheme.onBackground,),),
                               SizedBox(height:7),
-                              Text(_1pText2, textAlign: TextAlign.center, style: TextStyle(fontFamily: "Gangwon", fontSize: 60, height: 1.1, color: Colors.black,) ,),],
+                              Text(_1pText2, textAlign: TextAlign.center, style: TextStyle(fontFamily: "Gangwon", fontSize: 60, height: 1.1, color: Theme.of(context).colorScheme.onBackground,) ,),],
                           ),),),
 
                       // 해 위에 있는 흰박스+검은선~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
@@ -225,13 +383,13 @@ class _MyHomePageState extends State<MyHomePage> {
                           children: [
                             Container(
                               margin: EdgeInsets.only(bottom:0),
-                              decoration: const BoxDecoration(color: Colors.white,
+                              decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.background,
                                   border: Border(top: BorderSide(color: Colors.black, width:1),)),),
 
                             // 하단 영역 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             Container(
                                 child: Container(
-                                  // color: Colors.red,
                                   alignment: Alignment.center,
                                   padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * BelowPadding),
                                   child: Column(
@@ -241,7 +399,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                         visible: _text42,
                                         child: Column(
                                             children: [
-                                              Text(_1pText3, textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 15, color: Colors.grey,),),
+                                              Text(_1pText3, textAlign: TextAlign.center,
+                                                style: TextStyle(fontFamily: "PreRg", fontSize: 15, color: Theme.of(context).colorScheme.onBackground,),),
                                               SizedBox(height:7)
                                             ]
                                         ),
@@ -249,20 +408,20 @@ class _MyHomePageState extends State<MyHomePage> {
                                       Visibility(
                                           visible: _text4,
                                           child:
-                                          Text(_1pText4, textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 27, color: Colors.black,),)
+                                          Text(_1pText4, textAlign: TextAlign.center,
+                                            style: TextStyle(fontFamily: "PreRg", fontSize: 27, color: Theme.of(context).colorScheme.onBackground,),)
                                       ), // 3번째 페이지 하단 글자 및 임시 버튼 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
                                       Visibility(
                                         visible: _mission2,
                                         child: Column(
                                             children: [
-                                              Text('$userEntryCount번째 해보기 성공!', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 25, color: Colors.black,),),
+                                              Text('$userEntryCount번째 해보기 성공!', textAlign: TextAlign.center,
+                                                style: TextStyle(fontFamily: "PreRg", fontSize: 25, color: Theme.of(context).colorScheme.onBackground,),),
                                               SizedBox(height:20),
                                               Row( mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
                                                 ElevatedButton(
                                                     onPressed: (){
-                                                      setState(() {
-                                                        _1pText1 = '카톡 작동예정';
-                                                      });
+                                                      shareOnKakao();
                                                     },
                                                     style: ElevatedButton.styleFrom(
                                                       backgroundColor: Colors.grey,
@@ -270,12 +429,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                                       shape: CircleBorder(),
                                                       padding: const EdgeInsets.symmetric(vertical:40, horizontal: 40),
                                                       alignment: Alignment.center,),
-                                                    child: const Text('카톡')),
+                                                    child: Text('카카오톡')),
                                                 ElevatedButton(
                                                     onPressed: (){
-                                                      setState(() {
-                                                        _1pText1 = '트위터 작동예정!';
-                                                      });
+                                                      shareOnTwitter();
                                                     },
                                                     style: ElevatedButton.styleFrom(
                                                       backgroundColor: Colors.grey,
@@ -283,12 +440,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                                       shape: CircleBorder(),
                                                       padding: const EdgeInsets.symmetric(vertical:40, horizontal: 40),
                                                       alignment: Alignment.center,),
-                                                    child: const Text('트위터')),
+                                                    child: Text('트위터')),
                                                 ElevatedButton(
                                                     onPressed: (){
-                                                      setState(() {
-                                                        _1pText1 = 'URL 작동중';
-                                                      });
+                                                      shareClipBoard();
                                                     },
                                                     style: ElevatedButton.styleFrom(
                                                       backgroundColor: Colors.grey,
@@ -300,15 +455,15 @@ class _MyHomePageState extends State<MyHomePage> {
                                               ]),
                                               SizedBox(height:20),
                                               Row( mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
-                                                Text('현재 ', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 15, color: Colors.black,),),
-                                                Text('$entryCount', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 15, color: Colors.black,),),
-                                                Text(' 명 참여중', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 15, color: Colors.black,),)
+                                                Text('현재 ', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 15, color: Theme.of(context).colorScheme.onBackground,),),
+                                                Text('$entryCount', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 15, color: Theme.of(context).colorScheme.onBackground,),),
+                                                Text(' 명 참여중', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 15, color: Theme.of(context).colorScheme.onBackground,),)
                                               ]),
                                               SizedBox(height:5),
                                               Row( mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
-                                                Text("다음 '그냥해'까지 ", textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreBd", fontSize: 15, color: Colors.black,),),
-                                                Text('$now', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreBd", fontSize: 15, color: Colors.black,),),
-                                                Text(' 남음', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreBd", fontSize: 15, color: Colors.black,),)
+                                                Text("다음 '그냥해'까지 ", textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreBd", fontSize: 15, color: Theme.of(context).colorScheme.onBackground,),),
+                                                Text('$timeText', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreBd", fontSize: 15, color: Theme.of(context).colorScheme.onBackground,),),
+                                                Text(' 남음', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreBd", fontSize: 15, color: Theme.of(context).colorScheme.onBackground,),)
                                               ])
                                             ]
 
@@ -331,8 +486,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                                   });
                                                 },
                                                 style: ElevatedButton.styleFrom(
-                                                  backgroundColor: Colors.black,
-                                                  foregroundColor: Colors.white,
+                                                  backgroundColor: Theme.of(context).colorScheme.secondary,
+                                                  foregroundColor: Theme.of(context).colorScheme.onSecondary,
                                                   textStyle: const TextStyle(
                                                     fontFamily: "Gangwon",
                                                     fontSize: 30.0,
