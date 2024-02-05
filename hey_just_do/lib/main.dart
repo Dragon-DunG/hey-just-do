@@ -48,11 +48,16 @@ class _MyHomePageState extends State<MyHomePage> {
   var _1pText2 = '그냥해!';
   var _1pText3 = '오늘의 해는 어떤해?';
   var _1pText4 = '해를 클릭해서 확인해!';
+  bool hae = false; //logo와 함께 간다
+  bool _visible = true;
+
   bool _mission = false;
+  bool _topSentence = false;
   bool _text4 = true;
   bool _mission2 = false;
   bool _text42 = true;
   var BelowPadding = 0.12;
+
   var now = new DateTime.now();
   //String formatDate = DateFormat('yy/MM/dd - HH:mm:ss').format(now);
 
@@ -155,66 +160,106 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
 
-        body: Container(
-            height: MediaQuery.of(context).size.height,
-            child: Stack(
+      body: Container(
+          height: MediaQuery.of(context).size.height,
+        //Q 팝업~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
+        child: Stack(
+          children: [
+            Container(
+              alignment: Alignment.topRight,
+              margin: EdgeInsets.all(25),
+              child: InkWell(
+                onTap: (){
+                  setState(() {
+                    myDialog(context);
+                  });
+                },
+                child: Image.asset('images/Q.png')
+              )
+            ),
+            //해 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~```
+            Stack(
+              children: <Widget>[
+                AnimatedPositioned(
+                  duration: const Duration(seconds: 1),
+                  curve: Curves.fastOutSlowIn,
+                  bottom: hae ? MediaQuery.of(context).size.height * 0.25 : MediaQuery.of(context).size.height * 0.015,
+                  left: MediaQuery.of(context).size.width * 0.2,
+                  right: MediaQuery.of(context).size.width * 0.2,
+                  child: Container(
+                      alignment: Alignment.center,
+                      width : MediaQuery.of(context).size.width / 1.2, height : MediaQuery.of(context).size.width / 1.2,
+                      decoration: BoxDecoration(color: Colors.orange,shape: BoxShape.circle,),
+                  ),),
+                //로고~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 700),
+                  curve: Curves.fastOutSlowIn,
+                  bottom: hae ? MediaQuery.of(context).size.height - 70 : MediaQuery.of(context).size.height - 250,
+                  height: hae ? 50 : 90,
+                  left: MediaQuery.of(context).size.width * 0.2,
+                  right: MediaQuery.of(context).size.width * 0.2,
+                  child: (
+                    Image.asset('images/logo.png'))  //,width: 60, height: 60
+                  )],
+            ),
+            //click 버튼 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            Container(
+              margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.12),
+              alignment: Alignment.center,
+              child: Visibility(
+                visible: _text4,
+                child: TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _1pText1 = '~ 오늘의 그냥해 미션 ~';
+                        _1pText2 = '붕어빵 먹고 하늘도 보고';
+                        _1pText3 = '소소하지만 한 번 해봐';
+                        _1pText4 = '';
+                        _topSentence = true;
+                        _text4 = false;
+                        _mission = true;
+                        hae = !hae;
+                      });
+                    },
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white, // 한번 눌러서 보라색으로 변한 글자/색상 변경
+                      textStyle: const TextStyle(
+                        fontFamily: "PreBd",
+                        fontSize: 30.0,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                      ),
+                      alignment: Alignment.center,),
+                      child: Text('click')),
+              ),
+            ),
+
+            Column( //상단 문장 2개 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 children: [
                   Container(
-                    //해 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~```
-                    alignment: Alignment.center,
-                    margin: EdgeInsets.only(
-                        top: MediaQuery.of(context).size.height * 0.45,
-                        left: MediaQuery.of(context).size.width * 0.2,
-                        right: MediaQuery.of(context).size.width * 0.2
+                    //color: Colors.blue,
+                    height: MediaQuery.of(context).size.height * 0.6,
+                    child: Container(
+                      padding: EdgeInsets.only(
+                          top: MediaQuery.of(context).size.height * 0.2,
+                          left: 30,
+                          right: 30
+                      ),
+                            child: AnimatedOpacity(
+                                opacity: _topSentence ? 1.0 : 0.0,
+                                duration: const Duration(milliseconds: 600),
+                                child: Column(
+                                  children: [
+                                    Text(_1pText1, textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 25, color: Colors.black,),),
+                                    SizedBox(height:7),
+                                    Text(_1pText2, textAlign: TextAlign.center, style: TextStyle(fontFamily: "Gangwon", fontSize: 60, height: 1.1, color: Colors.black,) ,)
+                                  ]
+                                ),
+                            ),
+                        ),
                     ),
-                    width : MediaQuery.of(context).size.width / 1.5, height : MediaQuery.of(context).size.width / 1.5, decoration: BoxDecoration(color: Colors.orange,shape: BoxShape.circle,),),
-                  //click 버튼 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                  Container(
-                      margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.4 - 200.0),
-                      alignment: Alignment.center,
-                      child: Visibility(
-                        visible: _text4,
-                        child: TextButton(
-                            onPressed: () {
-                              setState(() {
-                                _1pText1 = '~ 오늘의 그냥해 미션 ~';
-                                _1pText2 = '$todayMission';
-                                _1pText3 = '소소하지만 한번 해봐';
-                                _1pText4 = '';
-                                _text4 = false;
-                                _mission = true;
-                              });
-                            },
-                            style: TextButton.styleFrom(
-                              foregroundColor: Colors.black, // 한번 눌러서 보라색으로 변한 글자/색상 변경
-                              textStyle: const TextStyle(
-                                fontFamily: "Gangwon",
-                                fontSize: 30.0,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w900,
-                              ),
-                              alignment: Alignment.center,),
-                            child: Text('click')),
-                      )
-                  ),
-                  //상단 문장 2개 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
-                  Column(
-                    children: [
-                      Container(
-                        height: MediaQuery.of(context).size.height * 0.6,
-                        child: Container(
-                          // color: Colors.blue,
-                          padding: EdgeInsets.only(
-                              top: MediaQuery.of(context).size.height * 0.2,
-                              left: 10,
-                              right: 10
-                          ),
-                          child: Column(
-                            children: [
-                              Text(_1pText1, textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreBd", fontSize: 20, color: Colors.black,),),
-                              SizedBox(height:7),
-                              Text(_1pText2, textAlign: TextAlign.center, style: TextStyle(fontFamily: "Gangwon", fontSize: 60, height: 1.1, color: Colors.black,) ,),],
-                          ),),),
+
 
                       // 해 위에 있는 흰박스+검은선~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
                       Container(
@@ -258,6 +303,32 @@ class _MyHomePageState extends State<MyHomePage> {
                                               Text('$userEntryCount번째 해보기 성공!', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 25, color: Colors.black,),),
                                               SizedBox(height:20),
                                               Row( mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+                                                InkWell(
+                                                  onTap: (){
+                                                    setState(() {
+                                                      _1pText1 = '카톡 작동중';
+                                                    });
+                                                  },
+                                                  child: Image.asset('images/kakao.png',width: 60, height: 60),
+                                                ),
+                                                SizedBox(width:15),
+                                                InkWell(
+                                                  onTap: (){
+                                                    setState(() {
+                                                      _1pText1 = '트위터 작동중';
+                                                    });
+                                                  },
+                                                  child: Image.asset('images/X.png',width: 60, height: 60),
+                                                ),
+                                                SizedBox(width:15),
+                                                InkWell(
+                                                  onTap: (){
+                                                    setState(() {
+                                                      _1pText1 = 'URL 작동중';
+                                                    });
+                                                  },
+                                                  child: Image.asset('images/URL.png',width: 60, height: 60),
+                                                )
                                                 ElevatedButton(
                                                     onPressed: (){
                                                       setState(() {
@@ -299,17 +370,11 @@ class _MyHomePageState extends State<MyHomePage> {
                                                     child: const Text('URL'))
                                               ]),
                                               SizedBox(height:20),
-                                              Row( mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
-                                                Text('현재 ', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 15, color: Colors.black,),),
-                                                Text('$entryCount', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 15, color: Colors.black,),),
-                                                Text(' 명 참여중', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 15, color: Colors.black,),)
-                                              ]),
+
+                                              Text("다음 '그냥해'까지 "+'$now'+' 남음', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreBd", fontSize: 15, color: Colors.black,),),
                                               SizedBox(height:5),
-                                              Row( mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
-                                                Text("다음 '그냥해'까지 ", textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreBd", fontSize: 15, color: Colors.black,),),
-                                                Text('$now', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreBd", fontSize: 15, color: Colors.black,),),
-                                                Text(' 남음', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreBd", fontSize: 15, color: Colors.black,),)
-                                              ])
+                                              Text('현재 '+'$entryCount'+' 명 참여중', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 15, color: Colors.black,),),
+
                                             ]
 
                                         ),
@@ -319,32 +384,30 @@ class _MyHomePageState extends State<MyHomePage> {
                                         visible: _mission,
                                         child: (
                                             ElevatedButton(
-                                                onPressed: () {
-                                                  setState(() {
-                                                    participate();
-                                                    _1pText1 = '~ 그냥해 시작을 축하해! ~';
-                                                    _1pText3 = '친구에게 그냥해 공유하기';
-                                                    _mission2 = true;
-                                                    _mission = false;
-                                                    _text42 = false;
-                                                    BelowPadding = 0.05; //하단영역 Padding 조절
-                                                  });
-                                                },
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor: Colors.black,
-                                                  foregroundColor: Colors.white,
-                                                  textStyle: const TextStyle(
-                                                    fontFamily: "Gangwon",
-                                                    fontSize: 30.0,
-                                                    color: Colors.black,
-                                                    fontWeight: FontWeight.w900,
-                                                  ),
-                                                  padding: EdgeInsets.symmetric(vertical: 25, horizontal: 60),
-                                                  alignment: Alignment.center,),
-                                                child: Text('미션 시작'))
-                                        ),
-                                      )
-                                    ],
+
+                                              onPressed: () {
+                                                setState(() {
+                                                  _mission2 = true;
+                                                  _mission = false;
+                                                  _text42 = false;
+                                                  BelowPadding = 0.05; //하단영역 Padding 조절
+                                                });
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.black,
+                                                foregroundColor: Colors.white,
+                                                textStyle: const TextStyle(
+                                                  fontFamily: "PreRg",
+                                                  fontSize: 28.0,
+                                                  color: Colors.black,
+                                                  fontWeight: FontWeight.w900,
+                                                ),
+                                                padding: EdgeInsets.symmetric(vertical: 23, horizontal: 80),
+                                                alignment: Alignment.center,),
+                                              child: Text('미션 시작'))
+                                          ),
+                                        )
+                                      ],
 
                                   ),
                                 )
@@ -357,5 +420,46 @@ class _MyHomePageState extends State<MyHomePage> {
                 ]
             )
         )
-    );
+
+      ); //Body
+
   }}
+
+void myDialog(context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false, //다이로그 밖 선택시 팝업 안 닫히게
+    builder: (context) {
+      return Dialog(
+        backgroundColor: Colors.orange,
+        shadowColor: Colors.black,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+        // 그림자 높이 elevation: 50,
+        alignment: Alignment.topCenter,
+        insetPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 200,
+        ),
+        child: SizedBox(
+          width: 400,
+          height: 300,
+          child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text("팝업이다.", style: TextStyle(fontFamily: "PreRd", fontSize: 15, color: Colors.white,)),
+            const SizedBox(height: 10),
+            IconButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              icon: const Icon(Icons.close),
+            )
+          ],
+        )
+        )
+      );
+    },
+  );
+}
