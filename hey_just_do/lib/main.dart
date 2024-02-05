@@ -1,14 +1,22 @@
 import 'dart:async';
-
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'dart:html' as html;
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hey_just_do/firebase_options.dart';
 
-void main() {
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MainApp());
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({Key? key});
+  const MainApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +39,10 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String feedbackText = '';
+  String? currentId;
+  String? todayMission;
+  int? entryCount;
+  int userEntryCount = 0;
 
   var _1pText1 = '소소하든 중대하든';
   var _1pText2 = '그냥해!';
@@ -46,10 +58,104 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _text42 = true;
   var BelowPadding = 0.12;
 
-  //임의 설정
-  var MyCount = 1;
-  var HowMany = 21;
-  var now = 21; //시간. Thanks to 채연언니
+  var now = new DateTime.now();
+  //String formatDate = DateFormat('yy/MM/dd - HH:mm:ss').format(now);
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserEntryCount();
+    readData();
+  }
+
+  void _loadUserEntryCount() {
+    final cookieString = html.window.document.cookie;
+    final storedEntryCount = cookieString?.split(';')
+        .firstWhere((cookie) => cookie.trim().startsWith('userEntryCount='),
+        orElse: () => '')
+        .split('=')
+        .last;
+
+    if (storedEntryCount != null && storedEntryCount.isNotEmpty) {
+      setState(() {
+        userEntryCount = int.parse(storedEntryCount);
+      });
+    }
+  }
+
+
+  void readData() {
+    final missionsCollectionReference = FirebaseFirestore.instance.collection("missions");
+
+    missionsCollectionReference
+        .orderBy(FieldPath.documentId)
+        .limit(1)
+        .get()
+        .then((querySnapshot) {
+      if (querySnapshot.docs.isNotEmpty) {
+        setState(() {
+          todayMission = querySnapshot.docs.first.data()?['mission'];
+          entryCount = querySnapshot.docs.first.data()?['entryCount'];
+          currentId = querySnapshot.docs.first.id;
+        });
+      } else {
+        print('No data available');
+      }
+    });
+  }
+
+  void getNextData() {
+    if (currentId != null) {
+      final missionsCollectionReference = FirebaseFirestore.instance.collection("missions");
+
+      missionsCollectionReference
+          .where(FieldPath.documentId, isGreaterThan: currentId!)
+          .orderBy(FieldPath.documentId)
+          .limit(1)
+          .get()
+          .then((querySnapshot) {
+        if (querySnapshot.docs.isNotEmpty) {
+          setState(() {
+            todayMission = querySnapshot.docs.first.data()?['mission'];
+            entryCount = querySnapshot.docs.first.data()?['entryCount'];
+            currentId = querySnapshot.docs.first.id;
+          });
+        } else {
+          print('No more data available');
+        }
+      });
+    }
+  }
+
+  void participate() {
+    final missionsCollectionReference = FirebaseFirestore.instance.collection("missions");
+
+    missionsCollectionReference.doc(currentId).get().then((documentSnapshot) {
+      if (documentSnapshot.exists) {
+        entryCount = documentSnapshot.data()?['entryCount'] ?? 0;
+        missionsCollectionReference.doc(currentId).update({
+          'entryCount': FieldValue.increment(1),
+        }).then((value) {
+          setState(() {
+            userEntryCount++;
+            entryCount = (entryCount ?? 0) + 1;
+          });
+          final expirationDate = DateTime.now().add(Duration(days: 100));
+          html.window.document.cookie = 'userEntryCount=$userEntryCount;expires=$expirationDate';
+
+        }).catchError((error) {
+          print("Failed to update entryCount: $error");
+        });
+      } else {
+        print("Document does not exist");
+      }
+    }).catchError((error) {
+      print("Failed to get current entryCount: $error");
+    });
+  }
+
+  // double screenHeight = MediaQuery.of(context).size.height;  // 화면 높이
+
 
   @override
   Widget build(BuildContext context) {
@@ -155,46 +261,49 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                     ),
 
+
                       // 해 위에 있는 흰박스+검은선~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
                       Container(
-                          height: MediaQuery.of(context).size.height * 0.4,
-                          margin: EdgeInsets.all(0), /*color: Colors.red,*/
-                          child: Stack(
-                            alignment: Alignment.bottomCenter,
-                            children: [
-                              Container(
-                                margin: EdgeInsets.only(bottom:0),
-                                decoration: const BoxDecoration(color: Colors.white,
-                                    border: Border(top: BorderSide(color: Colors.black, width:1),)),),
+                        height: MediaQuery.of(context).size.height * 0.4,
+                        margin: EdgeInsets.all(0), /*color: Colors.red,*/
+                        child: Stack(
+                          alignment: Alignment.bottomCenter,
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(bottom:0),
+                              decoration: const BoxDecoration(color: Colors.white,
+                                  border: Border(top: BorderSide(color: Colors.black, width:1),)),),
 
-                              // 하단 영역 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                              Container(
-                                  child: Container(
-                                    // color: Colors.red,
-                                    alignment: Alignment.center,
-                                    padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * BelowPadding),
-                                    child: Column(
-                                      // 하단 문장 2개 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                                      children: [
-                                        Visibility(
-                                          visible: _text42,
-                                          child: Column(
-                                              children: [
-                                                Text(_1pText3, textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 15, color: Colors.grey,),),
-                                                SizedBox(height:7)
-                                              ]
-                                          ),
+                            // 하단 영역 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                            Container(
+                                child: Container(
+                                  // color: Colors.red,
+                                  alignment: Alignment.center,
+                                  padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * BelowPadding),
+                                  child: Column(
+                                    // 하단 문장 2개 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                    children: [
+                                      Visibility(
+                                        visible: _text42,
+                                        child: Column(
+                                            children: [
+                                              Text(_1pText3, textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 15, color: Colors.grey,),),
+                                              SizedBox(height:7)
+                                            ]
                                         ),
-                                        Visibility(
+                                      ),
+                                      Visibility(
                                           visible: _text4,
                                           child:
-                                              Text(_1pText4, textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 27, color: Colors.black,),)
-                                        ), // 3번째 페이지 하단 글자 및 임시 버튼 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
-                                        Visibility(
-                                          visible: _mission2,
-                                          child: Column(
+                                          Text(_1pText4, textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 27, color: Colors.black,),)
+                                      ), // 3번째 페이지 하단 글자 및 임시 버튼 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
+                                      Visibility(
+                                        visible: _mission2,
+                                        child: Column(
                                             children: [
-                                              Text('$MyCount'+'번째 해보기 성공!', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 25, color: Colors.black,),),
+
+                                              Text('$userEntryCount번째 해보기 성공!', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 25, color: Colors.black,),),
+
                                               SizedBox(height:20),
                                               Row( mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
                                                 InkWell(
@@ -225,18 +334,21 @@ class _MyHomePageState extends State<MyHomePage> {
                                                 )
                                               ]),
                                               SizedBox(height:20),
+
                                               Text("다음 '그냥해'까지 "+'$now'+' 남음', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreBd", fontSize: 15, color: Colors.black,),),
                                               SizedBox(height:5),
-                                              Text('현재 '+'$HowMany'+' 명 참여중', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 15, color: Colors.black,),),
+                                              Text('현재 '+'$entryCount'+' 명 참여중', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 15, color: Colors.black,),),
+
                                             ]
 
-                                          ),
-                                          ),
-                                        // 미션 시작 버튼 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
-                                        Visibility(
-                                          visible: _mission,
-                                          child: (
+                                        ),
+                                      ),
+                                      // 미션 시작 버튼 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
+                                      Visibility(
+                                        visible: _mission,
+                                        child: (
                                             ElevatedButton(
+
                                               onPressed: () {
                                                 setState(() {
                                                   _mission2 = true;
@@ -261,19 +373,21 @@ class _MyHomePageState extends State<MyHomePage> {
                                         )
                                       ],
 
-                                    ),
-                                  )
-                              ),
-                            ],
-                          ),
-                      ),
-                ],
-            ),
-          ]
-        )
-      ) //Body
 
-    );
+                                  ),
+                                )
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ]
+            )
+        )
+
+      ); //Body
+
   }}
 
 void myDialog(context) {
