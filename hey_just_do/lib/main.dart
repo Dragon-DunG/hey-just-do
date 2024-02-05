@@ -156,7 +156,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // double screenHeight = MediaQuery.of(context).size.height;  // 화면 높이
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -301,9 +300,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                         visible: _mission2,
                                         child: Column(
                                             children: [
-
                                               Text('$userEntryCount번째 해보기 성공!', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 25, color: Colors.black,),),
-
                                               SizedBox(height:20),
                                               Row( mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
                                                 InkWell(
@@ -332,6 +329,45 @@ class _MyHomePageState extends State<MyHomePage> {
                                                   },
                                                   child: Image.asset('images/URL.png',width: 60, height: 60),
                                                 )
+                                                ElevatedButton(
+                                                    onPressed: (){
+                                                      setState(() {
+                                                        _1pText1 = '카톡 작동예정';
+                                                      });
+                                                    },
+                                                    style: ElevatedButton.styleFrom(
+                                                      backgroundColor: Colors.grey,
+                                                      foregroundColor: Colors.white,
+                                                      shape: CircleBorder(),
+                                                      padding: const EdgeInsets.symmetric(vertical:40, horizontal: 40),
+                                                      alignment: Alignment.center,),
+                                                    child: const Text('카톡')),
+                                                ElevatedButton(
+                                                    onPressed: (){
+                                                      setState(() {
+                                                        _1pText1 = '트위터 작동예정!';
+                                                      });
+                                                    },
+                                                    style: ElevatedButton.styleFrom(
+                                                      backgroundColor: Colors.grey,
+                                                      foregroundColor: Colors.white,
+                                                      shape: CircleBorder(),
+                                                      padding: const EdgeInsets.symmetric(vertical:40, horizontal: 40),
+                                                      alignment: Alignment.center,),
+                                                    child: const Text('트위터')),
+                                                ElevatedButton(
+                                                    onPressed: (){
+                                                      setState(() {
+                                                        _1pText1 = 'URL 작동중';
+                                                      });
+                                                    },
+                                                    style: ElevatedButton.styleFrom(
+                                                      backgroundColor: Colors.grey,
+                                                      foregroundColor: Colors.white,
+                                                      shape: CircleBorder(),
+                                                      padding: const EdgeInsets.symmetric(vertical:40, horizontal: 40),
+                                                      alignment: Alignment.center,),
+                                                    child: const Text('URL'))
                                               ]),
                                               SizedBox(height:20),
 
@@ -372,7 +408,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                           ),
                                         )
                                       ],
-
 
                                   ),
                                 )

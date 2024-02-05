@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "name": "heyjustdo",
+  "rewrites": [
+    {"source": "/(.*)", "destination": "/"}
+  ]
+}
