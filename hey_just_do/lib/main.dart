@@ -4,7 +4,9 @@ import 'dart:html' as html;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:lottie/lottie.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -20,7 +22,7 @@ final FeedTemplate defaultFeed = FeedTemplate(
     title: '친구가 첫 번째 그냥해!를 시작했어요🌞',
     imageUrl: Uri.parse(
         'https://mud-kage.kakao.com/dn/Q2iNx/btqgeRgV54P/VLdBs9cvyn8BJXB3o7N8UK/kakaolink40_original.png'),
-    description: '어떤 해!인지 확인해볼까요?',
+    description: '어떤 해인지 확인해볼까요?',
     link: Link(
         webUrl: Uri.parse('https://developers.kakao.com'),
         mobileWebUrl: Uri.parse('https://developers.kakao.com')),
@@ -74,7 +76,7 @@ class DynamicTheme {
   static final darkTheme = ThemeData(
       colorScheme: const ColorScheme.dark(
         background: Color(0xFF44576E),
-        primary: Color(0xFFECECEC),
+        primary: Color(0xFFC1C1C1),
         secondary: Colors.white,
         tertiary: Colors.white60,
         onBackground: Colors.white,
@@ -252,7 +254,7 @@ class _MyHomePageState extends State<MyHomePage> {
           setState(() {
             userEntryCount++;
             if(userEntryCount > 1) {
-              shareText = '친구가 $userEntryCount번째 그냥해!를 시작했어요🌞\n 어떤 해!인지 확인해볼까요?\n';
+              shareText = '친구가 $userEntryCount번째 그냥해!를 시작했어요🌞\n 어떤 해인지 확인해볼까요?\n';
             }
             entryCount = (entryCount ?? 0) + 1;
           });
@@ -341,7 +343,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     myDialog(context);
                   });
                 },
-                child: Image.asset('images/Q.png')
+                child: Icon(Icons.help_outline, color:Theme.of(context).colorScheme.tertiary)
               )
             ),
             Stack(
@@ -359,7 +361,11 @@ class _MyHomePageState extends State<MyHomePage> {
                       alignment: Alignment.center,
                       //width : MediaQuery.of(context).size.width / 1.2, height : MediaQuery.of(context).size.width / 1.2,
                       width : 370, height : 370,
-                      decoration: BoxDecoration(color: Colors.orange,shape: BoxShape.circle,),
+                      decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary,shape: BoxShape.circle,),
+                    child: Visibility(
+                      visible: Theme.of(context).brightness == Brightness.dark,
+                      child: SvgPicture.asset('images/moon.svg'),
+                    ),
                   ),),
                 //로고~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 AnimatedPositioned(
@@ -370,7 +376,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   left: MediaQuery.of(context).size.width * 0.2,
                   right: MediaQuery.of(context).size.width * 0.2,
                   child: (
-                    Image.asset('images/logo.png'))  //,width: 60, height: 60
+                    SvgPicture.asset( Theme.of(context).brightness == Brightness.dark ? 'images/logo_dark.svg' : 'images/logo.svg'))  //,width: 60, height: 60
                   ),
             //click 버튼 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
               Container(
@@ -382,7 +388,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       onPressed: () {
                         setState(() {
                           _1pText1 = '~ 오늘의 그냥해 미션 ~';
-                          _1pText2 = '붕어빵 먹고 하늘도 보고';
+                          _1pText2 = '$todayMission';
                           _1pText3 = '소소하지만 한 번 해봐';
                           _1pText4 = '';
                           _topSentence = true;
@@ -425,7 +431,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 children: [
                                   Text(_1pText1, textAlign: TextAlign.center,
                                     style: TextStyle(fontFamily: "PreRg", fontSize: 25, color: Theme.of(context).colorScheme.onBackground,),),
-                                  SizedBox(height:7),
+                                  const SizedBox(height:7),
                                   Text(_1pText2, textAlign: TextAlign.center,
                                     style: TextStyle(fontFamily: "Gangwon", fontSize: 60, height: 1.1, color: Theme.of(context).colorScheme.onBackground,) ,)
                                 ]
@@ -598,77 +604,77 @@ void myDialog(context) {
 
         child: Container(
           width: 450,
-          padding: EdgeInsets.all(35),
-          //color: Colors.red,
+          padding: const EdgeInsets.all(35),
           alignment: Alignment.center,
           child: SingleChildScrollView( child: Column(
             children: [
-                Image.asset('images/face.png', width: 60),
-                SizedBox(height: 5),
+                SvgPicture.asset('images/face.svg', width: 60),
+                const SizedBox(height: 5),
                 Container(
-                    padding: EdgeInsets.only(top:20),
+                    padding: const EdgeInsets.only(top:20),
                     alignment: Alignment.center,
-                    child: const Column(
+                    child: Column(
                         children: [
-                          Text("새해만 되면 여기저기서 올라오는 갓생 인증글들 사이에서 불안함을 느꼈던 적이 있나요? 특히 올해의 ‘띠’라면 왠지 모르게 더 잘 살아야할 것만 같은 부담감이 장난 아니죠.", style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Colors.black,)),
-                          SizedBox(height: 18),
-                          Text("그냥해!는 용띠와 쥐띠가 뭉쳐 갓생러들 사이 '갓생이 아니어도 괜찮은' 이들을 위해 생겨났어요. 부담없이 소소한 미션들을 수행하며 작은 용기들을 얻어가셨으면 좋겠습니다.", style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Colors.black,)),
-                          SizedBox(height: 18),
-                          Text("미션들을 왜 해야하냐구요? 그냥 한 번 해보세요! 분명히 달라지실 거예요. 우리도 그랬으니까요 :)", style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Colors.black,))
+                          Text("새해만 되면 여기저기서 올라오는 갓생 인증글들 사이에서 불안함을 느꼈던 적이 있나요? 특히 올해의 ‘띠’라면 왠지 모르게 더 잘 살아야할 것만 같은 부담감이 장난 아니죠.",
+                              style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Theme.of(context).colorScheme.onBackground,)),
+                          const SizedBox(height: 18),
+                          Text("그냥해!는 용띠와 쥐띠가 뭉쳐 갓생러들 사이 '갓생이 아니어도 괜찮은' 이들을 위해 생겨났어요. 부담없이 소소한 미션들을 수행하며 작은 용기들을 얻어가셨으면 좋겠습니다.",
+                              style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Theme.of(context).colorScheme.onBackground,)),
+                          const SizedBox(height: 18),
+                          Text("미션들을 왜 해야하냐구요? 그냥 한 번 해보세요! 분명히 달라지실 거예요. 우리도 그랬으니까요 :)",
+                              style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Theme.of(context).colorScheme.onBackground,))
                         ]
                     ),
                 ),
-                SizedBox(height: 25),
+                const SizedBox(height: 25),
                 Container(
                   //width: 380,
-                    padding: EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(20),
                   alignment: Alignment.center,
-                  decoration: BoxDecoration(color: Color(0xffFF9737).withOpacity(0.3), borderRadius: BorderRadius.circular(15)),
-                  child: const Column(
+                  decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary.withOpacity(0.3), borderRadius: BorderRadius.circular(15)),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                     Text.rich(
                     TextSpan(
-                      children: <TextSpan> [
+                      children: const <TextSpan> [
                         TextSpan(
-                            text: '· ', style: TextStyle(fontFamily: "PreBd", fontSize: 16, color: Colors.black, )
-                        ),
+                            text: '· ', style: TextStyle(fontFamily: "PreBd")),
                         TextSpan(
-                            text: '매일 자정에 ', style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Colors.black)
-                        ),
+                            text: '매일 자정에 '),
                         TextSpan(
-                            text: '새로운 미션', style: TextStyle(fontFamily: "PreBd", fontSize: 16, color: Colors.black)
-                        ),
+                            text: '새로운 미션', style: TextStyle(fontFamily: "PreBd")),
                         TextSpan(
-                            text: '이 공개돼요.', style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Colors.black)
-                        ),
-                      ], ), ),
-                      SizedBox(height: 15),
+                            text: '이 공개돼요.'),
+                      ],
+                    style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Theme.of(context).colorScheme.onBackground)), ),
+                      const SizedBox(height: 15),
                       Text.rich(
                         TextSpan(
-                          children: <TextSpan> [
+                          children: const <TextSpan> [
                             TextSpan(
-                                text: '· 미션 수행 여부는 체크 NO!', style: TextStyle(fontFamily: "PreBd", fontSize: 16, color: Colors.black)
+                                text: '· 미션 수행 여부는 체크 NO!', style: TextStyle(fontFamily: "PreBd")
                             ),
                             TextSpan(
-                                text: ' 혼자 또는 친구와 부담없이 미션을 수행해봐요.', style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Colors.black)
-                            )
-                          ], ), ),
-                      SizedBox(height: 15),
+                                text: ' 혼자 또는 친구와 부담없이 미션을 수행해봐요.')
+                          ],
+                            style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Theme.of(context).colorScheme.onBackground)
+                        ), ),
+                      const SizedBox(height: 15),
                       Text.rich(
                         TextSpan(
-                          children: <TextSpan> [
+                          children: const <TextSpan> [
                             TextSpan(
-                                text: '· 여러 번 ', style: TextStyle(fontFamily: "PreBd", fontSize: 16, color: Colors.black)
+                                text: '· 여러 번 ', style: TextStyle(fontFamily: "PreBd")
                             ),
                             TextSpan(
-                                text: '미션에 참여하면 좋은 일이 생겨요.', style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Colors.black)
-                            )
-                          ], ), ),
+                                text: '미션에 참여하면 좋은 일이 생길지도?' )
+                          ],
+                            style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Theme.of(context).colorScheme.onBackground)), ),
                     ]
                   )
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 IconButton(
                   onPressed: () {
                     Navigator.of(context).pop();
