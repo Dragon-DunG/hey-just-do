@@ -4,12 +4,16 @@ import 'dart:html' as html;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
+
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk_share.dart';
 import 'package:flutter/services.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hey_just_do/firebase_options.dart';
+import 'package:flutter/services.dart';
 
 final FeedTemplate defaultFeed = FeedTemplate(
   content: Content(
@@ -74,16 +78,23 @@ class DynamicTheme {
         secondary: Colors.white,
         tertiary: Colors.white60,
         onBackground: Colors.white,
-        onPrimary: Colors.black,
+        onPrimary: Colors.white,
         onSecondary: Color(0xFF44576E),
       ));
 }
 
 void main() async {
+
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  //
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+  //
   KakaoSdk.init(
       javaScriptAppKey: 'a45ef9643128ef4def000227b1e86c8a'
   );
@@ -133,7 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _text42 = true;
   var BelowPadding = 0.12;
 
-  String shareText = '친구가 첫 번째 그냥해!를 시작했어요🌞\n어떤 해!인지 확인해볼까요?\n';
+  String shareText = '친구가 첫 번째 그냥해!를 시작했어요🌞\n어떤 해인지 확인해볼까요?\n';
   final String appLink = 'hey-just-do.vercel.app';
 
   @override
@@ -259,6 +270,9 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  // double screenHeight = MediaQuery.of(context).size.height;  // 화면 높이
+
+
   void shareOnTwitter() async {
     Uri tweetUrl = Uri.parse('https://twitter.com/intent/tweet?text=$shareText&url=$appLink');
 
@@ -315,9 +329,9 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       body: Container(
           height: MediaQuery.of(context).size.height,
-        //Q 팝업~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
         child: Stack(
           children: [
+            //Q 팝업~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
             Container(
               alignment: Alignment.topRight,
               margin: EdgeInsets.all(25),
@@ -330,19 +344,22 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Image.asset('images/Q.png')
               )
             ),
-            //해 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~```
             Stack(
+              //해 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
               children: <Widget>[
                 AnimatedPositioned(
                   duration: const Duration(seconds: 1),
                   curve: Curves.fastOutSlowIn,
                   bottom: hae ? MediaQuery.of(context).size.height * 0.25 : MediaQuery.of(context).size.height * 0.015,
-                  left: MediaQuery.of(context).size.width * 0.2,
-                  right: MediaQuery.of(context).size.width * 0.2,
+                  //left: MediaQuery.of(context).size.width * 0.2,
+                  //right: MediaQuery.of(context).size.width * 0.2,
+                  left: 50,
+                  right: 50,
                   child: Container(
                       alignment: Alignment.center,
-                      width : MediaQuery.of(context).size.width / 1.2, height : MediaQuery.of(context).size.width / 1.2,
-                      decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary,shape: BoxShape.circle,),
+                      //width : MediaQuery.of(context).size.width / 1.2, height : MediaQuery.of(context).size.width / 1.2,
+                      width : 370, height : 370,
+                      decoration: BoxDecoration(color: Colors.orange,shape: BoxShape.circle,),
                   ),),
                 //로고~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 AnimatedPositioned(
@@ -354,67 +371,84 @@ class _MyHomePageState extends State<MyHomePage> {
                   right: MediaQuery.of(context).size.width * 0.2,
                   child: (
                     Image.asset('images/logo.png'))  //,width: 60, height: 60
-                  )],
-            ),
+                  ),
             //click 버튼 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            Container(
-              margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.12),
-              alignment: Alignment.center,
-              child: Visibility(
-                visible: _text4,
-                child: TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _1pText1 = '~ 오늘의 그냥해 미션 ~';
-                        _1pText2 = '붕어빵 먹고 하늘도 보고';
-                        _1pText3 = '소소하지만 한 번 해봐';
-                        _1pText4 = '';
-                        _topSentence = true;
-                        _text4 = false;
-                        _mission = true;
-                        hae = !hae;
-                      });
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: Theme.of(context).colorScheme.onPrimary, // 한번 눌러서 보라색으로 변한 글자/색상 변경
-                      textStyle: const TextStyle(
-                        fontFamily: "PreBd",
-                        fontSize: 30.0,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w900,
-                      ),
-                      alignment: Alignment.center,),
-                      child: Text('click')),
+              Container(
+                margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.12),
+                alignment: Alignment.center,
+                child: Visibility(
+                  visible: _text4,
+                  child: TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _1pText1 = '~ 오늘의 그냥해 미션 ~';
+                          _1pText2 = '붕어빵 먹고 하늘도 보고';
+                          _1pText3 = '소소하지만 한 번 해봐';
+                          _1pText4 = '';
+                          _topSentence = true;
+                          _text4 = false;
+                          _mission = true;
+                          hae = !hae;
+                        });
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary, // 한번 눌러서 보라색으로 변한 글자/색상 변경
+                        textStyle: const TextStyle(
+                          fontFamily: "PreBd",
+                          fontSize: 30.0,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                        ),
+                        alignment: Alignment.center,),
+                        child: Text('click')),
+                ),
               ),
-            ),
+              ],),
 
             Column( //상단 문장 2개 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 children: [
-                  Container(
-                    //color: Colors.blue,
-                    height: MediaQuery.of(context).size.height * 0.6,
-                    child: Container(
-                      padding: EdgeInsets.only(
-                          top: MediaQuery.of(context).size.height * 0.2,
-                          left: 30,
-                          right: 30
-                      ),
-                            child: AnimatedOpacity(
-                                opacity: _topSentence ? 1.0 : 0.0,
-                                duration: const Duration(milliseconds: 600),
-                                child: Column(
-                                  children: [
-                                    Text(_1pText1, textAlign: TextAlign.center,
-                                      style: TextStyle(fontFamily: "PreRg", fontSize: 25, color: Theme.of(context).colorScheme.onBackground,),),
-                                    SizedBox(height:7),
-                                    Text(_1pText2, textAlign: TextAlign.center,
-                                      style: TextStyle(fontFamily: "Gangwon", fontSize: 60, height: 1.1, color: Theme.of(context).colorScheme.onBackground,) ,)
-                                  ]
-                                ),
+                  Stack(
+                      children: <Widget> [
+                      Container(
+                        //color: Colors.blue,
+                        height: MediaQuery.of(context).size.height * 0.6,
+                        child: Container(
+                          padding: EdgeInsets.only(
+                              top: MediaQuery.of(context).size.height * 0.22,
+                              left: 30,
+                              right: 30
+                          ),
+                          child: AnimatedOpacity(
+                            opacity: _topSentence ? 1.0 : 0.0,
+                            duration: const Duration(milliseconds: 600),
+                            child: Column(
+                                children: [
+                                  Text(_1pText1, textAlign: TextAlign.center,
+                                    style: TextStyle(fontFamily: "PreRg", fontSize: 25, color: Theme.of(context).colorScheme.onBackground,),),
+                                  SizedBox(height:7),
+                                  Text(_1pText2, textAlign: TextAlign.center,
+                                    style: TextStyle(fontFamily: "Gangwon", fontSize: 60, height: 1.1, color: Theme.of(context).colorScheme.onBackground,) ,)
+                                ]
                             ),
+                          ),
                         ),
-                    ),
-
+                      ),
+                        //팡파레~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                      Container(
+                          height: MediaQuery.of(context).size.height * 0.6,
+                        child: Visibility(
+                            visible: _mission2,
+                            child: Container(
+                                alignment: Alignment.topCenter,
+                                child: Lottie.asset('lottie/Pang.json')
+                            )
+                        ),
+                      ),
+                      ]),
+                                                                                      // ],
+                  Stack(
+                      children: <Widget> [                                                         //),
+                   //,width: 60, height: 60
 
                       // 해 위에 있는 흰박스+검은선~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
                       Container(
@@ -457,8 +491,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                         visible: _mission2,
                                         child: Column(
                                             children: [
-                                              Text('$userEntryCount번째 해보기 성공!', textAlign: TextAlign.center,
-                                                style: TextStyle(fontFamily: "PreRg", fontSize: 25, color: Theme.of(context).colorScheme.onBackground,),),
+                                              Text('$userEntryCount번째 해보기 성공!', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 25, color: Colors.black,),),
                                               SizedBox(height:20),
                                               Row( mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
                                                 InkWell(
@@ -489,7 +522,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                                     });
                                                   },
                                                   child: Image.asset('images/URL.png',width: 60, height: 60),
-                                                )
+                                                ),
+
                                               ]),
                                               SizedBox(height:20),
 
@@ -508,14 +542,14 @@ class _MyHomePageState extends State<MyHomePage> {
                                         visible: _mission,
                                         child: (
                                             ElevatedButton(
-
                                               onPressed: () {
                                                 participate();
                                                 setState(() {
+
                                                   _mission2 = true;
                                                   _mission = false;
                                                   _text42 = false;
-                                                  BelowPadding = 0.05; //하단영역 Padding 조절
+                                                  BelowPadding = 0.05;//하단영역 Padding 조절
                                                 });
                                               },
                                               style: ElevatedButton.styleFrom(
@@ -539,51 +573,110 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                           ],
                         ),
-                      ),
+                      ),                        ]),
                     ],
                   ),
                 ]
             )
         )
-
       ); //Body
-
   }}
-
-void myDialog(context) {
+//팝업~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
+void myDialog(context) { 
   showDialog(
     context: context,
     barrierDismissible: false, //다이로그 밖 선택시 팝업 안 닫히게
     builder: (context) {
       return Dialog(
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        surfaceTintColor: Colors.white,
         shadowColor: Colors.black,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(15),
         ),
         // 그림자 높이 elevation: 50,
-        alignment: Alignment.topCenter,
-        insetPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 200,
-        ),
-        child: SizedBox(
-          width: 400,
-          height: 300,
-          child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text("팝업이다.",
-                style: TextStyle(fontFamily: "PreRd", fontSize: 15, color: Theme.of(context).colorScheme.onPrimary,)),
-            const SizedBox(height: 10),
-            IconButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              icon: const Icon(Icons.close),
-            )
+        insetPadding: const  EdgeInsets.fromLTRB(40,40,40,40),
+
+        child: Container(
+          width: 450,
+          padding: EdgeInsets.all(35),
+          //color: Colors.red,
+          alignment: Alignment.center,
+          child: SingleChildScrollView( child: Column(
+            children: [
+                Image.asset('images/face.png', width: 60),
+                SizedBox(height: 5),
+                Container(
+                    padding: EdgeInsets.only(top:20),
+                    alignment: Alignment.center,
+                    child: const Column(
+                        children: [
+                          Text("새해만 되면 여기저기서 올라오는 갓생 인증글들 사이에서 불안함을 느꼈던 적이 있나요? 특히 올해의 ‘띠’라면 왠지 모르게 더 잘 살아야할 것만 같은 부담감이 장난 아니죠.", style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Colors.black,)),
+                          SizedBox(height: 18),
+                          Text("그냥해!는 용띠와 쥐띠가 뭉쳐 갓생러들 사이 '갓생이 아니어도 괜찮은' 이들을 위해 생겨났어요. 부담없이 소소한 미션들을 수행하며 작은 용기들을 얻어가셨으면 좋겠습니다.", style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Colors.black,)),
+                          SizedBox(height: 18),
+                          Text("미션들을 왜 해야하냐구요? 그냥 한 번 해보세요! 분명히 달라지실 거예요. 우리도 그랬으니까요 :)", style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Colors.black,))
+                        ]
+                    ),
+                ),
+                SizedBox(height: 25),
+                Container(
+                  //width: 380,
+                    padding: EdgeInsets.all(20),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(color: Color(0xffFF9737).withOpacity(0.3), borderRadius: BorderRadius.circular(15)),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                    Text.rich(
+                    TextSpan(
+                      children: <TextSpan> [
+                        TextSpan(
+                            text: '· ', style: TextStyle(fontFamily: "PreBd", fontSize: 16, color: Colors.black, )
+                        ),
+                        TextSpan(
+                            text: '매일 자정에 ', style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Colors.black)
+                        ),
+                        TextSpan(
+                            text: '새로운 미션', style: TextStyle(fontFamily: "PreBd", fontSize: 16, color: Colors.black)
+                        ),
+                        TextSpan(
+                            text: '이 공개돼요.', style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Colors.black)
+                        ),
+                      ], ), ),
+                      SizedBox(height: 15),
+                      Text.rich(
+                        TextSpan(
+                          children: <TextSpan> [
+                            TextSpan(
+                                text: '· 미션 수행 여부는 체크 NO!', style: TextStyle(fontFamily: "PreBd", fontSize: 16, color: Colors.black)
+                            ),
+                            TextSpan(
+                                text: ' 혼자 또는 친구와 부담없이 미션을 수행해봐요.', style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Colors.black)
+                            )
+                          ], ), ),
+                      SizedBox(height: 15),
+                      Text.rich(
+                        TextSpan(
+                          children: <TextSpan> [
+                            TextSpan(
+                                text: '· 여러 번 ', style: TextStyle(fontFamily: "PreBd", fontSize: 16, color: Colors.black)
+                            ),
+                            TextSpan(
+                                text: '미션에 참여하면 좋은 일이 생겨요.', style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Colors.black)
+                            )
+                          ], ), ),
+                    ]
+                  )
+                ),
+                SizedBox(height: 20),
+                IconButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  icon: const Icon(Icons.close),
+              )
           ],
-        )
+        )       ),
         )
       );
     },
