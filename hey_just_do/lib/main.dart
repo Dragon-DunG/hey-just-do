@@ -412,12 +412,15 @@ void myDialog(context) {
     barrierDismissible: false, //다이로그 밖 선택시 팝업 안 닫히게
     builder: (context) {
       return Dialog(
+
         surfaceTintColor: Colors.white,
+
         shadowColor: Colors.black,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15),
         ),
         // 그림자 높이 elevation: 50,
+
         insetPadding: const  EdgeInsets.fromLTRB(40,40,40,40),
 
         child: Container(
@@ -500,6 +503,7 @@ void myDialog(context) {
                   },
                   icon: const Icon(Icons.close),
               )
+
           ],
         )       ),
         )
