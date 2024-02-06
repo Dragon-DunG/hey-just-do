@@ -15,6 +15,9 @@ dependencies:
   firebase_core: ^2.24.2
   cloud_firestore: ^4.14.0
   firebase_analytics: ^10.8.0
+  fluttertoast: ^8.2.4
+  url_launcher: ^6.2.4
+  kakao_flutter_sdk: ^1.8.0
 
 dev_dependencies:
   flutter_test:
