@@ -78,7 +78,7 @@ class DynamicTheme {
         secondary: Colors.white,
         tertiary: Colors.white60,
         onBackground: Colors.white,
-        onPrimary: Colors.black,
+        onPrimary: Colors.white,
         onSecondary: Color(0xFF44576E),
       ));
 }
@@ -329,16 +329,8 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       body: Container(
           height: MediaQuery.of(context).size.height,
-        //팡파레~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         child: Stack(
           children: [
-            Visibility(
-                visible: _mission2,
-                child: Container(
-                    alignment: Alignment.topCenter,
-                    child: Lottie.asset('lottie/Pang.json')
-                )
-            ),
             //Q 팝업~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
             Container(
               alignment: Alignment.topRight,
@@ -352,8 +344,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Image.asset('images/Q.png')
               )
             ),
-            //해 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~```
             Stack(
+              //해 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
               children: <Widget>[
                 AnimatedPositioned(
                   duration: const Duration(seconds: 1),
@@ -379,67 +371,84 @@ class _MyHomePageState extends State<MyHomePage> {
                   right: MediaQuery.of(context).size.width * 0.2,
                   child: (
                     Image.asset('images/logo.png'))  //,width: 60, height: 60
-                  )],
-            ),
+                  ),
             //click 버튼 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            Container(
-              margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.12),
-              alignment: Alignment.center,
-              child: Visibility(
-                visible: _text4,
-                child: TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _1pText1 = '~ 오늘의 그냥해 미션 ~';
-                        _1pText2 = '붕어빵 먹고 하늘도 보고';
-                        _1pText3 = '소소하지만 한 번 해봐';
-                        _1pText4 = '';
-                        _topSentence = true;
-                        _text4 = false;
-                        _mission = true;
-                        hae = !hae;
-                      });
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: Theme.of(context).colorScheme.onPrimary, // 한번 눌러서 보라색으로 변한 글자/색상 변경
-                      textStyle: const TextStyle(
-                        fontFamily: "PreBd",
-                        fontSize: 30.0,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w900,
-                      ),
-                      alignment: Alignment.center,),
-                      child: Text('click')),
+              Container(
+                margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.12),
+                alignment: Alignment.center,
+                child: Visibility(
+                  visible: _text4,
+                  child: TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _1pText1 = '~ 오늘의 그냥해 미션 ~';
+                          _1pText2 = '붕어빵 먹고 하늘도 보고';
+                          _1pText3 = '소소하지만 한 번 해봐';
+                          _1pText4 = '';
+                          _topSentence = true;
+                          _text4 = false;
+                          _mission = true;
+                          hae = !hae;
+                        });
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary, // 한번 눌러서 보라색으로 변한 글자/색상 변경
+                        textStyle: const TextStyle(
+                          fontFamily: "PreBd",
+                          fontSize: 30.0,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                        ),
+                        alignment: Alignment.center,),
+                        child: Text('click')),
+                ),
               ),
-            ),
+              ],),
 
             Column( //상단 문장 2개 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 children: [
-                  Container(
-                    //color: Colors.blue,
-                    height: MediaQuery.of(context).size.height * 0.6,
-                    child: Container(
-                      padding: EdgeInsets.only(
-                          top: MediaQuery.of(context).size.height * 0.22,
-                          left: 30,
-                          right: 30
-                      ),
-                            child: AnimatedOpacity(
-                                opacity: _topSentence ? 1.0 : 0.0,
-                                duration: const Duration(milliseconds: 600),
-                                child: Column(
-                                  children: [
-                                    Text(_1pText1, textAlign: TextAlign.center,
-                                      style: TextStyle(fontFamily: "PreRg", fontSize: 25, color: Theme.of(context).colorScheme.onBackground,),),
-                                    SizedBox(height:7),
-                                    Text(_1pText2, textAlign: TextAlign.center,
-                                      style: TextStyle(fontFamily: "Gangwon", fontSize: 60, height: 1.1, color: Theme.of(context).colorScheme.onBackground,) ,)
-                                  ]
-                                ),
+                  Stack(
+                      children: <Widget> [
+                      Container(
+                        //color: Colors.blue,
+                        height: MediaQuery.of(context).size.height * 0.6,
+                        child: Container(
+                          padding: EdgeInsets.only(
+                              top: MediaQuery.of(context).size.height * 0.22,
+                              left: 30,
+                              right: 30
+                          ),
+                          child: AnimatedOpacity(
+                            opacity: _topSentence ? 1.0 : 0.0,
+                            duration: const Duration(milliseconds: 600),
+                            child: Column(
+                                children: [
+                                  Text(_1pText1, textAlign: TextAlign.center,
+                                    style: TextStyle(fontFamily: "PreRg", fontSize: 25, color: Theme.of(context).colorScheme.onBackground,),),
+                                  SizedBox(height:7),
+                                  Text(_1pText2, textAlign: TextAlign.center,
+                                    style: TextStyle(fontFamily: "Gangwon", fontSize: 60, height: 1.1, color: Theme.of(context).colorScheme.onBackground,) ,)
+                                ]
                             ),
+                          ),
                         ),
-                    ),
-
+                      ),
+                        //팡파레~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                      Container(
+                          height: MediaQuery.of(context).size.height * 0.6,
+                        child: Visibility(
+                            visible: _mission2,
+                            child: Container(
+                                alignment: Alignment.topCenter,
+                                child: Lottie.asset('lottie/Pang.json')
+                            )
+                        ),
+                      ),
+                      ]),
+                                                                                      // ],
+                  Stack(
+                      children: <Widget> [                                                         //),
+                   //,width: 60, height: 60
 
                       // 해 위에 있는 흰박스+검은선~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
                       Container(
@@ -564,7 +573,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                           ],
                         ),
-                      ),
+                      ),                        ]),
                     ],
                   ),
                 ]
