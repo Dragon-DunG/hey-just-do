@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/hey-just-do.iml" filepath="$PROJECT_DIR$/.idea/hey-just-do.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hey_just_do.iml" filepath="$PROJECT_DIR$/hey_just_do.iml" />
+      <module fileurl="file://$PROJECT_DIR$/android/hey_just_do_android.iml" filepath="$PROJECT_DIR$/android/hey_just_do_android.iml" />
     </modules>
   </component>
 </project>
