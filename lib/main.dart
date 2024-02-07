@@ -16,6 +16,7 @@ import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hey_just_do/firebase_options.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 final FeedTemplate defaultFeed = FeedTemplate(
   content: Content(
@@ -37,6 +38,12 @@ final FeedTemplate defaultFeed = FeedTemplate(
     ),
   ],
 );
+
+int calculateDaysSince(DateTime startDate) {
+  DateTime today = DateTime.now();
+  Duration difference = today.difference(startDate);
+  return difference.inDays;
+}
 
 TimeOfDay getCurrentTime() {
   final DateTime now = DateTime.now();
@@ -76,7 +83,7 @@ class DynamicTheme {
   static final darkTheme = ThemeData(
       colorScheme: const ColorScheme.dark(
         background: Color(0xFF44576E),
-        primary: Color(0xFFC1C1C1),
+        primary: Color(0xFFD0D0D0),
         secondary: Colors.white,
         tertiary: Colors.white60,
         onBackground: Colors.white,
@@ -88,6 +95,7 @@ class DynamicTheme {
 void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -98,7 +106,7 @@ void main() async {
   ]);
   //
   KakaoSdk.init(
-      javaScriptAppKey: 'a45ef9643128ef4def000227b1e86c8a'
+      javaScriptAppKey: "45ef9643128ef4def000227b1e86c8a",
   );
   runApp(const MainApp());
 }
@@ -125,12 +133,17 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  DateTime startDate = DateTime(2024, 2, 4);
+  late DateTime _lastParticipationDate;
+  late bool _hasParticipatedToday;
+  int userEntryCount = 0;
+
   FToast fToast = FToast();
   String feedbackText = '';
   String? currentId;
   String? todayMission;
   int? entryCount;
-  int userEntryCount = 0;
+
 
   var _1pText1 = '소소하든 중대하든';
   var _1pText2 = '그냥해!';
@@ -147,13 +160,15 @@ class _MyHomePageState extends State<MyHomePage> {
   var BelowPadding = 0.12;
 
   String shareText = '친구가 첫 번째 그냥해!를 시작했어요🌞\n어떤 해인지 확인해볼까요?\n';
-  final String appLink = 'hey-just-do.vercel.app';
+  final String appLink = 'hey-just-do.xyz';
 
   @override
   void initState() {
     super.initState();
+    _initializeLastParticipationDate();
+    _updateLastParticipationDate();
     _loadUserEntryCount();
-    readData();
+    readData(calculateDaysSince(startDate));
     fToast.init(context);
   }
 
@@ -167,11 +182,11 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.sunny, color: Theme.of(context).colorScheme.onPrimary),
+          Icon(Icons.sunny, color: Theme.of(context).colorScheme.onSecondary),
           SizedBox(
             width: 12.0,
           ),
-          Text(message, style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),),
+          Text(message, style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),),
         ],
       ),
     );
@@ -191,20 +206,61 @@ class _MyHomePageState extends State<MyHomePage> {
         .split('=')
         .last;
 
+    final storedParticipationStatus = cookieString
+        ?.split(';')
+        .firstWhere((cookie) => cookie.trim().startsWith('hasParticipatedToday='),
+        orElse: () => '');
+
     if (storedEntryCount != null && storedEntryCount.isNotEmpty) {
       setState(() {
         userEntryCount = int.parse(storedEntryCount);
       });
     }
+    if (storedParticipationStatus!.isNotEmpty) {
+      final hasParticipatedToday = storedParticipationStatus.split('=').last;
+      setState(() {
+        _hasParticipatedToday = hasParticipatedToday.toLowerCase() == 'true';
+      });
+    }
+  }
+
+  void _initializeLastParticipationDate() {
+    final cookieValue = html.window.document.cookie
+        ?.split('; ')
+        .firstWhere((element) => element.startsWith('lastParticipationDate='),
+        orElse: () => '')
+        .split('=')
+        .last;
+    final lastParticipationDateString =
+    cookieValue!.isNotEmpty ? cookieValue : '2000-01-01';
+    setState(() {
+      _lastParticipationDate = DateTime.parse(lastParticipationDateString);
+      _hasParticipatedToday =
+          DateTime.now().difference(_lastParticipationDate).inDays == 0;
+    });
+  }
+
+  void _updateLastParticipationDate() {
+    final now = DateTime.now();
+    if (now.difference(_lastParticipationDate).inDays >= 1) {
+      // Reset entry count and last participation date if a new day has started
+      setState(() {
+        _lastParticipationDate = DateTime(now.year, now.month, now.day);
+        _hasParticipatedToday = false;
+      });
+      html.window.document.cookie =
+      'lastParticipationDate=${_lastParticipationDate.toIso8601String()};expires=${DateTime(now.year, now.month, now.day + 1).toUtc()}';
+      html.window.document.cookie =
+      'hasParticipatedToday=false;expires=${DateTime(now.year, now.month, now.day + 1).toUtc()}';
+    }
   }
 
 
-  void readData() {
+  void readData(int number) {
     final missionsCollectionReference = FirebaseFirestore.instance.collection("missions");
 
     missionsCollectionReference
-        .orderBy(FieldPath.documentId)
-        .limit(1)
+        .where('number', isEqualTo: number)
         .get()
         .then((querySnapshot) {
       if (querySnapshot.docs.isNotEmpty) {
@@ -253,13 +309,12 @@ class _MyHomePageState extends State<MyHomePage> {
         }).then((value) {
           setState(() {
             userEntryCount++;
-            if(userEntryCount > 1) {
-              shareText = '친구가 $userEntryCount번째 그냥해!를 시작했어요🌞\n 어떤 해인지 확인해볼까요?\n';
-            }
+            _hasParticipatedToday = true;
             entryCount = (entryCount ?? 0) + 1;
           });
           final expirationDate = DateTime.now().add(Duration(days: 100));
           html.window.document.cookie = 'userEntryCount=$userEntryCount;expires=$expirationDate';
+          html.window.document.cookie = 'hasParticipatedToday=true;expires=$expirationDate';
 
         }).catchError((error) {
           print("Failed to update entryCount: $error");
@@ -272,10 +327,19 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  String setShareText() {
+    final String returnText;
+    if(userEntryCount > 1) {
+      returnText = '친구가 $userEntryCount번째 그냥해!를 시작했어요🌞\n 어떤 해인지 확인해볼까요?\n';
+    } else {returnText = '친구가 첫 번째 그냥해!를 시작했어요🌞\n 어떤 해인지 확인해볼까요?\n';}
+    return returnText;
+  }
+
   // double screenHeight = MediaQuery.of(context).size.height;  // 화면 높이
 
 
   void shareOnTwitter() async {
+    String shareText = setShareText();
     Uri tweetUrl = Uri.parse('https://twitter.com/intent/tweet?text=$shareText&url=$appLink');
 
     if (!await launchUrl(tweetUrl)) {
@@ -308,6 +372,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> shareClipBoard() async {
+    String shareText = setShareText();
     await Clipboard.setData(ClipboardData(text: '$shareText$appLink'));
     _showToast("클립보드에 복사되었어요.");
   }
@@ -393,7 +458,9 @@ class _MyHomePageState extends State<MyHomePage> {
                           _1pText4 = '';
                           _topSentence = true;
                           _text4 = false;
-                          _mission = true;
+                          _text42 = !_hasParticipatedToday;
+                          _mission = !_hasParticipatedToday;
+                          _mission2 = _hasParticipatedToday;
                           hae = !hae;
                         });
                       },
@@ -497,15 +564,13 @@ class _MyHomePageState extends State<MyHomePage> {
                                         visible: _mission2,
                                         child: Column(
                                             children: [
-                                              Text('$userEntryCount번째 해보기 성공!', textAlign: TextAlign.center, style: TextStyle(fontFamily: "PreRg", fontSize: 25, color: Colors.black,),),
+                                              Text('$userEntryCount번째 해보기 시작!', textAlign: TextAlign.center,
+                                                style: TextStyle(fontFamily: "PreRg", fontSize: 25, color: Theme.of(context).colorScheme.onBackground,),),
                                               SizedBox(height:20),
                                               Row( mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
                                                 InkWell(
                                                   onTap: (){
                                                     shareOnKakao();
-                                                    setState(() {
-                                                      _1pText1 = '카톡 작동중';
-                                                    });
                                                   },
                                                   child: Image.asset('images/kakao.png',width: 60, height: 60),
                                                 ),
@@ -513,9 +578,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                                 InkWell(
                                                   onTap: (){
                                                     shareOnTwitter();
-                                                    setState(() {
-                                                      _1pText1 = '트위터 작동중';
-                                                    });
                                                   },
                                                   child: Image.asset('images/X.png',width: 60, height: 60),
                                                 ),
@@ -523,9 +585,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                                 InkWell(
                                                   onTap: (){
                                                     shareClipBoard();
-                                                    setState(() {
-                                                      _1pText1 = 'URL 작동중';
-                                                    });
                                                   },
                                                   child: Image.asset('images/URL.png',width: 60, height: 60),
                                                 ),
@@ -551,7 +610,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                               onPressed: () {
                                                 participate();
                                                 setState(() {
-
                                                   _mission2 = true;
                                                   _mission = false;
                                                   _text42 = false;

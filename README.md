@@ -1,2 +1,3 @@
-# hey-just-do
-그냥해
+# hey_just_do
+
+A new Flutter project.
