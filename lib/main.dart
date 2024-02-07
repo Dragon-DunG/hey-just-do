@@ -157,6 +157,8 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _text4 = true;
   bool _mission2 = false;
   bool _text42 = true;
+  bool _isButtonClicked = false;
+
   var BelowPadding = 0.12;
 
   String shareText = '친구가 첫 번째 그냥해!를 시작했어요🌞\n어떤 해인지 확인해볼까요?\n';
@@ -510,7 +512,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       Container(
                           height: MediaQuery.of(context).size.height * 0.6,
                         child: Visibility(
-                            visible: _mission2,
+                            visible: _mission2 && _isButtonClicked,
                             child: Container(
                                 alignment: Alignment.topCenter,
                                 child: Lottie.asset('lottie/Pang.json')
@@ -613,6 +615,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                                   _mission2 = true;
                                                   _mission = false;
                                                   _text42 = false;
+                                                  _isButtonClicked = true;
                                                   BelowPadding = 0.05;//하단영역 Padding 조절
                                                 });
                                               },
