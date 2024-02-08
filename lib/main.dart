@@ -18,26 +18,6 @@ import 'package:hey_just_do/firebase_options.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-final FeedTemplate defaultFeed = FeedTemplate(
-  content: Content(
-    title: '친구가 첫 번째 그냥해!를 시작했어요🌞',
-    imageUrl: Uri.parse(
-        'https://mud-kage.kakao.com/dn/Q2iNx/btqgeRgV54P/VLdBs9cvyn8BJXB3o7N8UK/kakaolink40_original.png'),
-    description: '어떤 해인지 확인해볼까요?',
-    link: Link(
-        webUrl: Uri.parse('https://developers.kakao.com'),
-        mobileWebUrl: Uri.parse('https://developers.kakao.com')),
-  ),
-  buttons: [
-    Button(
-      title: '확인하기',
-      link: Link(
-        webUrl: Uri.parse('https: //developers.kakao.com'),
-        mobileWebUrl: Uri.parse('https: //developers.kakao.com'),
-      ),
-    ),
-  ],
-);
 
 int calculateDaysSince(DateTime startDate) {
   DateTime today = DateTime.now();
@@ -51,6 +31,7 @@ TimeOfDay getCurrentTime() {
 }
 
 class DynamicTheme {
+
 
   static ThemeData getTheme() {
     final currentTime = getCurrentTime();
@@ -106,7 +87,7 @@ void main() async {
   ]);
   //
   KakaoSdk.init(
-      javaScriptAppKey: "45ef9643128ef4def000227b1e86c8a",
+      javaScriptAppKey: "a45ef9643128ef4def000227b1e86c8a",
   );
   runApp(const MainApp());
 }
@@ -118,7 +99,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       builder: FToastBuilder(),
-      title: 'heyjustdo',
+      title: '그냥해!',
       theme: DynamicTheme.getTheme(),
       home: MyHomePage(),
     );
@@ -144,7 +125,6 @@ class _MyHomePageState extends State<MyHomePage> {
   String? todayMission;
   int? entryCount;
 
-
   var _1pText1 = '소소하든 중대하든';
   var _1pText2 = '그냥해!';
   var _1pText3 = '오늘의 해는 어떤해?';
@@ -161,7 +141,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   var BelowPadding = 0.12;
 
-  String shareText = '친구가 첫 번째 그냥해!를 시작했어요🌞\n어떤 해인지 확인해볼까요?\n';
+  String shareTextA = '친구가 첫 번째 그냥해!를 시작했어요🌞';
+  String shareTextB = '어떤 해인지 알아볼까요?';
   final String appLink = 'hey-just-do.xyz';
 
   @override
@@ -332,16 +313,14 @@ class _MyHomePageState extends State<MyHomePage> {
   String setShareText() {
     final String returnText;
     if(userEntryCount > 1) {
-      returnText = '친구가 $userEntryCount번째 그냥해!를 시작했어요🌞\n 어떤 해인지 확인해볼까요?\n';
-    } else {returnText = '친구가 첫 번째 그냥해!를 시작했어요🌞\n 어떤 해인지 확인해볼까요?\n';}
+      returnText = '친구가 $userEntryCount번째 그냥해!를 시작했어요🌞';
+    } else {returnText = '친구가 첫 번째 그냥해!를 시작했어요🌞';}
     return returnText;
   }
 
   // double screenHeight = MediaQuery.of(context).size.height;  // 화면 높이
-
-
   void shareOnTwitter() async {
-    String shareText = setShareText();
+    String shareText = setShareText() + '\n' + shareTextB + '\n';
     Uri tweetUrl = Uri.parse('https://twitter.com/intent/tweet?text=$shareText&url=$appLink');
 
     if (!await launchUrl(tweetUrl)) {
@@ -349,32 +328,8 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void shareOnKakao() async {
-    // 카카오톡 실행 가능 여부 확인
-    bool isKakaoTalkSharingAvailable = await ShareClient.instance.isKakaoTalkSharingAvailable();
-
-    if (isKakaoTalkSharingAvailable) {
-      try {
-        Uri uri =
-        await ShareClient.instance.shareDefault(template: defaultFeed);
-        await ShareClient.instance.launchKakaoTalk(uri);
-        print('카카오톡 공유 완료');
-      } catch (error) {
-        print('카카오톡 공유 실패 $error');
-      }
-    } else {
-      try {
-        Uri shareUrl = await WebSharerClient.instance
-            .makeDefaultUrl(template: defaultFeed);
-        await launchBrowserTab(shareUrl, popupOpen: true);
-      } catch (error) {
-        print('카카오톡 공유 실패 $error');
-      }
-    }
-  }
-
   Future<void> shareClipBoard() async {
-    String shareText = setShareText();
+    String shareText = setShareText() + '\n' + shareTextB + '\n';
     await Clipboard.setData(ClipboardData(text: '$shareText$appLink'));
     _showToast("클립보드에 복사되었어요.");
   }
@@ -394,6 +349,51 @@ class _MyHomePageState extends State<MyHomePage> {
     Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {});
     });
+
+    final FeedTemplate defaultFeed = FeedTemplate(
+      content: Content(
+        title: setShareText(),
+        imageUrl: Uri.parse(
+            'https://firebasestorage.googleapis.com/v0/b/hey-just-do.appspot.com/o/kakaoShareImage2.png?alt=media&token=b40597a1-bd32-4782-ac58-c2fe8f2c39c8'),
+        description: shareTextB,
+        link: Link(
+            webUrl: Uri.parse('kakaotalk://web/openExternal?url=https://$appLink'),
+            mobileWebUrl: Uri.parse('kakaotalk://web/openExternal?url=https://$appLink')),
+      ),
+      buttons: [
+        Button(
+          title: '확인하기',
+          link: Link(
+            webUrl: Uri.parse('kakaotalk://web/openExternal?url=https://$appLink'),
+            mobileWebUrl: Uri.parse('kakaotalk://web/openExternal?url=https://$appLink'),
+          ),
+        ),
+      ],
+    );
+
+    void shareOnKakao() async {
+      // 카카오톡 실행 가능 여부 확인
+      bool isKakaoTalkSharingAvailable = await ShareClient.instance.isKakaoTalkSharingAvailable();
+
+      if (isKakaoTalkSharingAvailable) {
+        try {
+          Uri uri =
+          await ShareClient.instance.shareDefault(template: defaultFeed);
+          await ShareClient.instance.launchKakaoTalk(uri);
+          print('카카오톡 공유 완료');
+        } catch (error) {
+          print('카카오톡 공유 실패 $error');
+        }
+      } else {
+        try {
+          Uri shareUrl = await WebSharerClient.instance
+              .makeDefaultUrl(template: defaultFeed);
+          await launchBrowserTab(shareUrl, popupOpen: true);
+        } catch (error) {
+          print('카카오톡 공유 실패 $error');
+        }
+      }
+    }
 
     return Scaffold(
       body: Container(

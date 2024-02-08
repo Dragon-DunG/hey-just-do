@@ -43,7 +43,7 @@ flutter:
         - asset: assets/font/Pretendard-Regular.otf
     - family: Gangwon
       fonts:
-        - asset: assets/font/GangwonStrong.ttf
+        - asset: assets/font/GangwonStrong.otf
 
 
 
