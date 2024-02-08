@@ -1,8 +1,4 @@
 <svg width="476" height="476" viewBox="0 0 476 476" fill="none" xmlns="http://www.w3.org/2000/svg">
-<mask id="mask0_293_126" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="476" height="476">
-<circle cx="238" cy="238" r="238" fill="#ECECEC"/>
-</mask>
-<g mask="url(#mask0_293_126)">
 <g style="mix-blend-mode:darken">
 <circle cx="134.5" cy="176.5" r="48.5" fill="#B0B0B0"/>
 </g>
@@ -11,6 +7,5 @@
 </g>
 <g style="mix-blend-mode:darken">
 <circle cx="295.5" cy="194.5" r="53.5" fill="#B0B0B0"/>
-</g>
 </g>
 </svg>
