@@ -463,6 +463,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           _text42 = !_hasParticipatedToday;
                           _mission = !_hasParticipatedToday;
                           _mission2 = _hasParticipatedToday;
+                          if(_hasParticipatedToday) {BelowPadding = 0.05;}
                           hae = !hae;
                         });
                       },
