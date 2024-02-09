@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:math' as math;
+import 'dart:math';
 import 'dart:html' as html;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
@@ -12,7 +12,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk_share.dart';
 import 'package:flutter/services.dart';
-
+import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hey_just_do/firebase_options.dart';
 import 'package:flutter/services.dart';
@@ -31,7 +31,6 @@ TimeOfDay getCurrentTime() {
 }
 
 class DynamicTheme {
-
 
   static ThemeData getTheme() {
     final currentTime = getCurrentTime();
@@ -114,27 +113,27 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  DateTime startDate = DateTime(2024, 2, 4);
+  DateTime startDate = DateTime(2024, 2, 8);
   late DateTime _lastParticipationDate;
   late bool _hasParticipatedToday;
+  late int _todayMissionNumber;
   int userEntryCount = 0;
 
   FToast fToast = FToast();
   String feedbackText = '';
   String? currentId;
-  String? todayMission;
-  int? entryCount;
+  String? todayMission = '오늘의 미션은?';
+  int? entryCount = 0;
 
   var _1pText1 = '소소하든 중대하든';
   var _1pText2 = '그냥해!';
   var _1pText3 = '오늘의 해는 어떤해?';
   var _1pText4 = '해를 클릭해서 확인해!';
   bool hae = false; //logo와 함께 간다
-  bool _visible = true;
 
   bool _mission = false;
   bool _topSentence = false;
-  bool _text4 = true;
+  bool _text4 = false;
   bool _mission2 = false;
   bool _text42 = true;
   bool _isButtonClicked = false;
@@ -142,7 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
   var BelowPadding = 0.12;
 
   String shareTextA = '친구가 첫 번째 그냥해!를 시작했어요🌞';
-  String shareTextB = '어떤 해인지 알아볼까요?';
+  String shareTextB = '나의 그냥해!는 어떤 해일까요?';
   final String appLink = 'hey-just-do.xyz';
 
   @override
@@ -151,7 +150,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _initializeLastParticipationDate();
     _updateLastParticipationDate();
     _loadUserEntryCount();
-    readData(calculateDaysSince(startDate));
+    _setInitialData(calculateDaysSince(startDate));
     fToast.init(context);
   }
 
@@ -179,10 +178,6 @@ class _MyHomePageState extends State<MyHomePage> {
       gravity: ToastGravity.BOTTOM,
       toastDuration: Duration(seconds: 2),
     );
-  }
-
-  void setStartPage() {
-
   }
 
   void _loadUserEntryCount() {
@@ -242,9 +237,8 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-
-  void readData(int number) {
-    final missionsCollectionReference = FirebaseFirestore.instance.collection("missions");
+  void getData(int number) {
+    final missionsCollectionReference = FirebaseFirestore.instance.collection("missionList");
 
     missionsCollectionReference
         .where('number', isEqualTo: number)
@@ -253,8 +247,32 @@ class _MyHomePageState extends State<MyHomePage> {
       if (querySnapshot.docs.isNotEmpty) {
         setState(() {
           todayMission = querySnapshot.docs.first.data()?['mission'];
-          entryCount = querySnapshot.docs.first.data()?['entryCount'];
           currentId = querySnapshot.docs.first.id;
+          missionsCollectionReference.doc("TodayEntryCount").get()
+              .then((entryCountSnapshot) {
+            if(entryCountSnapshot.exists) {
+              entryCount =
+              entryCountSnapshot.data()?[DateFormat('yyyy-MM-dd').format(
+                  DateTime.now())];
+              if (entryCount == null) {
+                print('EntryCount Document does not exist');
+              }
+            }
+          }).catchError((error) {
+            print('Failed to get entryCount: $error');
+          });
+          if(_hasParticipatedToday){
+            _1pText1 = '~ 오늘의 그냥해 미션 ~';
+            _1pText2 = '$todayMission';
+            hae = true;
+            _mission = false;
+            _topSentence = true;
+            _text4 = false;
+            _mission2 = true;
+            _text42 = false;
+            _isButtonClicked = false;
+            BelowPadding = 0.05;
+          }
         });
       } else {
         print('No data available');
@@ -262,37 +280,71 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void getNextData() {
-    if (currentId != null) {
-      final missionsCollectionReference = FirebaseFirestore.instance.collection("missions");
+  void _setInitialData(int number) {
+    final missionsCollectionReference = FirebaseFirestore.instance.collection("missionList");
+    final now = DateTime.now();
+    late int randomNumber;
+    late int missionNumber;
 
-      missionsCollectionReference
-          .where(FieldPath.documentId, isGreaterThan: currentId!)
-          .orderBy(FieldPath.documentId)
-          .limit(1)
-          .get()
-          .then((querySnapshot) {
-        if (querySnapshot.docs.isNotEmpty) {
-          setState(() {
-            todayMission = querySnapshot.docs.first.data()?['mission'];
-            entryCount = querySnapshot.docs.first.data()?['entryCount'];
-            currentId = querySnapshot.docs.first.id;
-          });
-        } else {
-          print('No more data available');
+    final storedRandomNumber = html.window.document.cookie
+        ?.split(';')
+        .firstWhere(
+          (cookie) => cookie.trim().startsWith('TodayMissionNumber='),
+      orElse: () => '',
+    )
+        .split('=')
+        .last;
+
+    print(storedRandomNumber);
+    if(!_hasParticipatedToday){ _text4 = true; }
+
+    if (storedRandomNumber != null && storedRandomNumber.isNotEmpty) {
+      missionNumber = int.parse(storedRandomNumber);
+      getData(missionNumber);
+    } else {
+      missionsCollectionReference.get().then((querySnapshot) {
+        int totalDocuments = querySnapshot.docs.length;
+        List<int> storedNumbers = [];
+
+        final cookieString = html.window.document.cookie;
+        if (cookieString != null ) {
+          final storedCookie = cookieString.split(';').firstWhere(
+                  (cookie) => cookie.trim().startsWith('randomNumbers='),
+              orElse: () => ''
+          );
+          if (storedCookie.isNotEmpty) {
+            storedNumbers = storedCookie.split('=')[1].split(',')
+                .map((e) => int.parse(e))
+                .toList();
+          }
         }
+        // Generate a random number within the range of totalDocuments
+        List<int> availableNumbers = List.generate(totalDocuments - 1, (index) => index + 1)
+            .where((num) => !storedNumbers.contains(num))
+            .toList();
+        Random random = Random();
+        randomNumber = availableNumbers[random.nextInt(availableNumbers.length)];
+        storedNumbers.add(randomNumber);
+        html.window.document.cookie = 'randomNumbers=${storedNumbers.join(',')};expires=${DateTime(now.year, now.month, now.day + 100).toUtc()}';
+        html.window.document.cookie = 'TodayMissionNumber=$randomNumber;expires=${DateTime(now.year, now.month, now.day + 1).toUtc()}';
+        missionNumber = randomNumber;
+        getData(missionNumber);
+      }).catchError((error) {
+        print('Failed to get total document count: $error');
       });
     }
-  }
+    }
+
 
   void participate() {
-    final missionsCollectionReference = FirebaseFirestore.instance.collection("missions");
+    final missionsCollectionReference = FirebaseFirestore.instance.collection("missionList");
+    String todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-    missionsCollectionReference.doc(currentId).get().then((documentSnapshot) {
+    missionsCollectionReference.doc("TodayEntryCount").get().then((documentSnapshot) {
       if (documentSnapshot.exists) {
-        entryCount = documentSnapshot.data()?['entryCount'] ?? 0;
-        missionsCollectionReference.doc(currentId).update({
-          'entryCount': FieldValue.increment(1),
+        entryCount = documentSnapshot.data()?[todayDate] ?? 0;
+        missionsCollectionReference.doc("TodayEntryCount").update({
+          '$todayDate': FieldValue.increment(1),
         }).then((value) {
           setState(() {
             userEntryCount++;
@@ -315,7 +367,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   String setShareText() {
-    final String returnText;
+    String returnText;
     if(userEntryCount > 1) {
       returnText = '친구가 $userEntryCount번째 그냥해!를 시작했어요🌞';
     } else {returnText = '친구가 첫 번째 그냥해!를 시작했어요🌞';}
@@ -324,7 +376,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // double screenHeight = MediaQuery.of(context).size.height;  // 화면 높이
   void shareOnTwitter() async {
-    String shareText = setShareText() + '\n' + shareTextB + '\n';
+    String shareText = '${setShareText()}\n[ 친구의 미션 : $todayMission ]\n\n$shareTextB\n';
     Uri tweetUrl = Uri.parse('https://twitter.com/intent/tweet?text=$shareText&url=$appLink');
 
     if (!await launchUrl(tweetUrl)) {
@@ -333,7 +385,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> shareClipBoard() async {
-    String shareText = setShareText() + '\n' + shareTextB + '\n';
+    String shareText = '${setShareText()}\n[ 친구의 미션 : $todayMission ]\n\n$shareTextB\n';
     await Clipboard.setData(ClipboardData(text: '$shareText$appLink'));
     _showToast("클립보드에 복사되었어요.");
   }
@@ -359,17 +411,17 @@ class _MyHomePageState extends State<MyHomePage> {
         title: setShareText(),
         imageUrl: Uri.parse(
             'https://firebasestorage.googleapis.com/v0/b/hey-just-do.appspot.com/o/kakaoShareImage2.png?alt=media&token=b40597a1-bd32-4782-ac58-c2fe8f2c39c8'),
-        description: shareTextB,
+        description: '[ 친구의 미션 : $todayMission ]',
         link: Link(
-            webUrl: Uri.parse('kakaotalk://web/openExternal?url=https://$appLink'),
-            mobileWebUrl: Uri.parse('kakaotalk://web/openExternal?url=https://$appLink')),
+            webUrl: Uri.parse('https://developers.kakao.com'),
+            mobileWebUrl: Uri.parse('https://developers.kakao.com')),
       ),
       buttons: [
         Button(
-          title: '확인하기',
+          title: '나의 그냥해!는 어떤 해일까요?',
           link: Link(
-            webUrl: Uri.parse('kakaotalk://web/openExternal?url=https://$appLink'),
-            mobileWebUrl: Uri.parse('kakaotalk://web/openExternal?url=https://$appLink'),
+            webUrl: Uri.parse('https://developers.kakao.com'),
+            mobileWebUrl: Uri.parse('https://developers.kakao.com'),
           ),
         ),
       ],
@@ -508,7 +560,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                     style: TextStyle(fontFamily: "PreRg", fontSize: 25, color: Theme.of(context).colorScheme.onBackground,),),
                                   const SizedBox(height:7),
                                   Text(_1pText2, textAlign: TextAlign.center,
-                                    style: TextStyle(fontFamily: "Gangwon", fontSize: 60, height: 1.1, color: Theme.of(context).colorScheme.onBackground,) ,)
+                                    style: TextStyle(fontFamily: "Gangwon",
+                                      fontSize: _1pText2.length < 10 ? 60 : _1pText2.length < 12 ? 54 : 48,
+                                      height: 1.1, color: Theme.of(context).colorScheme.onBackground,) ,)
                                 ]
                             ),
                           ),
@@ -572,7 +626,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                         visible: _mission2,
                                         child: Column(
                                             children: [
-                                              Text('$userEntryCount번째 해보기 시작!', textAlign: TextAlign.center,
+                                              Text('$userEntryCount번째 ' + (_hasParticipatedToday && !_isButtonClicked ? '해를 봤어요!' : '해보기 시작!'), textAlign: TextAlign.center,
                                                 style: TextStyle(fontFamily: "PreRg", fontSize: 25, color: Theme.of(context).colorScheme.onBackground,),),
                                               SizedBox(height:20),
                                               Row( mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
@@ -603,7 +657,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                               Text("다음 '그냥해'까지 $timeText 남음", textAlign: TextAlign.center,
                                                 style: TextStyle(fontFamily: "PreBd", fontSize: 15, color: Theme.of(context).colorScheme.onBackground,),),
                                               SizedBox(height:5),
-                                              Text('현재 $entryCount명 참여중', textAlign: TextAlign.center,
+                                              Text('오늘 $entryCount명이 함께 해를 봤어요', textAlign: TextAlign.center,
                                                 style: TextStyle(fontFamily: "PreRg", fontSize: 15, color: Theme.of(context).colorScheme.onBackground,),),
 
                                             ]
