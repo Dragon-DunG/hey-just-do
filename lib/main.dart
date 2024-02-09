@@ -141,8 +141,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   var BelowPadding = 0.12;
 
-  String shareTextA = '친구가 첫 번째 그냥해!를 시작했어요🌞';
-  String shareTextB = '나의 그냥해!는 어떤 해일까요?';
+  String shareTextA = '첫 번째 그냥해!를 시작했어요🌞';
+  String shareTextB = '나의 그냥해! 확인해보기';
   final String appLink = 'hey-just-do.xyz';
 
 
@@ -274,6 +274,7 @@ class _MyHomePageState extends State<MyHomePage> {
             _text42 = false;
             _isButtonClicked = false;
             BelowPadding = 0.05;
+            _dim = true;
           }
         });
       } else {
@@ -297,7 +298,6 @@ class _MyHomePageState extends State<MyHomePage> {
         .split('=')
         .last;
 
-    print(storedRandomNumber);
     if(!_hasParticipatedToday){ _text4 = true; }
 
     if (storedRandomNumber != null && storedRandomNumber.isNotEmpty) {
@@ -371,14 +371,14 @@ class _MyHomePageState extends State<MyHomePage> {
   String setShareText() {
     String returnText;
     if(userEntryCount > 1) {
-      returnText = '친구가 $userEntryCount번째 그냥해!를 시작했어요🌞';
-    } else {returnText = '친구가 첫 번째 그냥해!를 시작했어요🌞';}
+      returnText = '$userEntryCount번째 그냥해!를 시작했어요🌞';
+    } else {returnText = '첫 번째 그냥해!를 시작했어요🌞';}
     return returnText;
   }
 
   // double screenHeight = MediaQuery.of(context).size.height;  // 화면 높이
   void shareOnTwitter() async {
-    String shareText = '${setShareText()}\n[ 친구의 미션 : $todayMission ]\n\n$shareTextB\n';
+    String shareText = '${setShareText()}\n[ 미션 : $todayMission ]\n\n$shareTextB\n';
     Uri tweetUrl = Uri.parse('https://twitter.com/intent/tweet?text=$shareText&url=$appLink');
 
     if (!await launchUrl(tweetUrl)) {
@@ -387,7 +387,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> shareClipBoard() async {
-    String shareText = '${setShareText()}\n[ 친구의 미션 : $todayMission ]\n\n$shareTextB\n';
+    String shareText = '${setShareText()}\n[ 미션 : $todayMission ]\n\n$shareTextB\n';
     await Clipboard.setData(ClipboardData(text: '$shareText$appLink'));
     _showToast("클립보드에 복사되었어요.");
   }
@@ -420,7 +420,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       buttons: [
         Button(
-          title: '나의 그냥해!는 어떤 해일까요?',
+          title: shareTextB,
           link: Link(
             webUrl: Uri.parse('https://developers.kakao.com'),
             mobileWebUrl: Uri.parse('https://developers.kakao.com'),
@@ -465,7 +465,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 AnimatedPositioned(
                   duration: const Duration(seconds: 1),
                   curve: Curves.fastOutSlowIn,
-                  bottom: hae ? MediaQuery.of(context).size.height * 0.25 : MediaQuery.of(context).size.height * 0.001,
+                  bottom: hae ? MediaQuery.of(context).size.height * 0.25 : MediaQuery.of(context).size.height * 0.010,
                   //left: MediaQuery.of(context).size.width * 0.2,
                   //right: MediaQuery.of(context).size.width * 0.2,
                   left: 50,
@@ -593,7 +593,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         Container(
                           height: MediaQuery.of(context).size.height * 0.6,
                           child: Visibility(
-                              visible: _mission2,
+                              visible: _mission2 && _isButtonClicked,
                               child: Container(
                                   alignment: Alignment.topCenter,
                                   child:  Lottie.asset(
@@ -682,7 +682,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                               Text("다음 '그냥해'까지 $timeText 남음", textAlign: TextAlign.center,
                                                 style: TextStyle(fontFamily: "PreBd", fontSize: 15, color: Theme.of(context).colorScheme.onBackground,),),
                                               SizedBox(height:5),
-                                              Text('오늘 $entryCount명이 함께 해를 봤어요', textAlign: TextAlign.center,
+                                              Text('오늘 $entryCount명이 함께 참여했어요', textAlign: TextAlign.center,
                                                 style: TextStyle(fontFamily: "PreRg", fontSize: 15, color: Theme.of(context).colorScheme.onBackground,),),
 
                                             ]
@@ -758,22 +758,13 @@ void myDialog(context) {
               child: SingleChildScrollView( child: Column(
                 children: [
                   SvgPicture.asset('images/face.svg', width: 60),
-                  const SizedBox(height: 5),
+                  // const SizedBox(height: 5),
                   Container(
                     padding: const EdgeInsets.only(top:20),
                     alignment: Alignment.center,
                     child: Column(
                         children: [
-                          Text("Our Instagram !",
-                              style: TextStyle(fontFamily: "PreBd", fontSize: 14, color: Theme.of(context).colorScheme.onBackground, )),
-                          TextButton(
-                            child: Text("@ hey_just_do",
-                            style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Theme.of(context).colorScheme.onBackground,fontStyle: FontStyle.italic, decoration: TextDecoration.underline)),
-                            onPressed: () {
-                              launchUrl(Uri.parse('https://www.instagram.com/hey_just_do?igsh=MWkzNHJteHRjeGI4Zw=='));
-                            },
-                          ),
-                          const SizedBox(height: 18),
+                          const SizedBox(height: 16),
                           Text("새해만 되면 여기저기서 올라오는 갓생 인증글들 사이에서 불안함을 느꼈던 적이 있나요? 특히 올해의 ‘띠’라면 왠지 모르게 더 잘 살아야할 것만 같은 부담감이 장난 아니죠.",
                               style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Theme.of(context).colorScheme.onBackground,)),
                           const SizedBox(height: 18),
@@ -833,6 +824,18 @@ void myDialog(context) {
                           ]
                       )
                   ),
+                  const SizedBox(height: 18,),
+                  Text("Instagram",
+                      style: TextStyle(fontFamily: "PreBd", fontSize: 14, color: Theme.of(context).colorScheme.onBackground, )),
+                  TextButton(
+                    style: ButtonStyle( padding: MaterialStateProperty.all<EdgeInsetsGeometry>(EdgeInsets.symmetric(vertical: 0))),
+                    child: Text("@ hey_just_do",
+                        style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Theme.of(context).colorScheme.onBackground,fontStyle: FontStyle.italic, decoration: TextDecoration.underline)),
+                    onPressed: () {
+                      launchUrl(Uri.parse('https://www.instagram.com/hey_just_do?igsh=MWkzNHJteHRjeGI4Zw=='));
+                    },
+                  ),
+                  const SizedBox(height: 16,),
                 ],
               )
               ),
