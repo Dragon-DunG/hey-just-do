@@ -181,6 +181,10 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  void setStartPage() {
+
+  }
+
   void _loadUserEntryCount() {
     final cookieString = html.window.document.cookie;
     final storedEntryCount = cookieString?.split(';')
@@ -486,6 +490,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   Stack(
                       children: <Widget> [
                       Container(
+                        alignment: Alignment.center,
                         //color: Colors.blue,
                         height: MediaQuery.of(context).size.height * 0.6,
                         child: Container(
@@ -624,10 +629,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                                 backgroundColor: Theme.of(context).colorScheme.secondary,
                                                 foregroundColor: Theme.of(context).colorScheme.onSecondary,
                                                 textStyle: const TextStyle(
-                                                  fontFamily: "PreRg",
+                                                  fontFamily: "PreBd",
                                                   fontSize: 28.0,
                                                   color: Colors.black,
-                                                  fontWeight: FontWeight.w900,
+                                                  // fontWeight: FontWeight.w900,
                                                 ),
                                                 padding: EdgeInsets.symmetric(vertical: 23, horizontal: 80),
                                                 alignment: Alignment.center,),
@@ -653,7 +658,7 @@ class _MyHomePageState extends State<MyHomePage> {
 void myDialog(context) { 
   showDialog(
     context: context,
-    barrierDismissible: false, //다이로그 밖 선택시 팝업 안 닫히게
+    barrierDismissible: true, //다이로그 밖 선택시 팝업 안 닫히게
     builder: (context) {
       return Dialog(
         surfaceTintColor: Colors.white,
@@ -662,11 +667,11 @@ void myDialog(context) {
           borderRadius: BorderRadius.circular(15),
         ),
         // 그림자 높이 elevation: 50,
-        insetPadding: const  EdgeInsets.fromLTRB(40,40,40,40),
+        insetPadding: const  EdgeInsets.fromLTRB(20,40,20,40),
 
         child: Container(
           width: 450,
-          padding: const EdgeInsets.all(35),
+          padding: const EdgeInsets.all(30),
           alignment: Alignment.center,
           child: SingleChildScrollView( child: Column(
             children: [
