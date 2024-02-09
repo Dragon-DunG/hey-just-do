@@ -126,3 +126,5 @@ coverage/
 .idea/libraries/Dart_SDK.xml
 
 hey_just_do.iml
+hey_just_do/macos/Flutter/ephemeral/flutter_export_environment.sh
+hey_just_do/macos/Flutter/ephemeral/Flutter-Generated.xcconfig
