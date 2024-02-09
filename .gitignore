@@ -127,3 +127,5 @@ coverage/
 
 hey_just_do.iml
 .metadata
+hey_just_do/macos/Flutter/ephemeral/flutter_export_environment.sh
+hey_just_do/macos/Flutter/ephemeral/Flutter-Generated.xcconfig

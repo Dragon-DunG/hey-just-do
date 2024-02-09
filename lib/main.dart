@@ -137,12 +137,14 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _mission2 = false;
   bool _text42 = true;
   bool _isButtonClicked = false;
+  bool _dim = false;
 
   var BelowPadding = 0.12;
 
   String shareTextA = '친구가 첫 번째 그냥해!를 시작했어요🌞';
   String shareTextB = '나의 그냥해!는 어떤 해일까요?';
   final String appLink = 'hey-just-do.xyz';
+
 
   @override
   void initState() {
@@ -456,26 +458,14 @@ class _MyHomePageState extends State<MyHomePage> {
           height: MediaQuery.of(context).size.height,
         child: Stack(
           children: [
-            //Q 팝업~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
-            Container(
-              alignment: Alignment.topRight,
-              margin: EdgeInsets.all(25),
-              child: InkWell(
-                onTap: (){
-                  setState(() {
-                    myDialog(context);
-                  });
-                },
-                child: Icon(Icons.help_outline, color:Theme.of(context).colorScheme.tertiary)
-              )
-            ),
+
             Stack(
               //해 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
               children: <Widget>[
                 AnimatedPositioned(
                   duration: const Duration(seconds: 1),
                   curve: Curves.fastOutSlowIn,
-                  bottom: hae ? MediaQuery.of(context).size.height * 0.25 : MediaQuery.of(context).size.height * 0.015,
+                  bottom: hae ? MediaQuery.of(context).size.height * 0.25 : MediaQuery.of(context).size.height * 0.001,
                   //left: MediaQuery.of(context).size.width * 0.2,
                   //right: MediaQuery.of(context).size.width * 0.2,
                   left: 50,
@@ -521,6 +511,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           _mission2 = _hasParticipatedToday;
                           if(_hasParticipatedToday) {BelowPadding = 0.05;}
                           hae = !hae;
+                          _dim = true;
                         });
                       },
                       style: TextButton.styleFrom(
@@ -535,6 +526,35 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: Text('click')),
                 ),
               ),
+                //딤~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                Container(
+                  height: MediaQuery.of(context).size.height * 0.6,
+                  child: Visibility(
+                      visible: _dim,
+                      child: Visibility(
+                        visible: Theme.of(context).brightness == Brightness.dark,
+                          child: Container(
+                            alignment: Alignment.topCenter,
+                            color: Colors.black.withOpacity(0.5),
+                          )
+                      )
+
+                  ),
+                ),
+
+                //Q 팝업~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
+                Container(
+                    alignment: Alignment.topRight,
+                    margin: EdgeInsets.all(25),
+                    child: InkWell(
+                        onTap: (){
+                          setState(() {
+                            myDialog(context);
+                          });
+                        },
+                        child: Icon(Icons.help_outline, color:Theme.of(context).colorScheme.tertiary)
+                    )
+                ),
               ],),
 
             Column( //상단 문장 2개 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -568,21 +588,26 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                         ),
                       ),
+
                         //팡파레~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                      Container(
+                        Container(
                           height: MediaQuery.of(context).size.height * 0.6,
-                        child: Visibility(
-                            visible: _mission2 && _isButtonClicked,
-                            child: Container(
-                                alignment: Alignment.topCenter,
-                                child: Lottie.asset('lottie/Pang.json')
-                            )
+                          child: Visibility(
+                              visible: _mission2,
+                              child: Container(
+                                  alignment: Alignment.topCenter,
+                                  child:  Lottie.asset(
+                                    'lottie/Pang.json',
+                                    repeat: false
+                                  ),
+
+                              )
+                          ),
                         ),
-                      ),
                       ]),
-                                                                                      // ],
+
                   Stack(
-                      children: <Widget> [                                                         //),
+                      children: <Widget> [
                    //,width: 60, height: 60
 
                       // 해 위에 있는 흰박스+검은선~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
@@ -680,16 +705,16 @@ class _MyHomePageState extends State<MyHomePage> {
                                                 });
                                               },
                                               style: ElevatedButton.styleFrom(
+                                                minimumSize: Size(110,70),
                                                 backgroundColor: Theme.of(context).colorScheme.secondary,
                                                 foregroundColor: Theme.of(context).colorScheme.onSecondary,
                                                 textStyle: const TextStyle(
                                                   fontFamily: "PreBd",
                                                   fontSize: 28.0,
                                                   color: Colors.black,
-                                                  // fontWeight: FontWeight.w900,
                                                 ),
-                                                padding: EdgeInsets.symmetric(vertical: 23, horizontal: 80),
-                                                alignment: Alignment.center,),
+                                                padding: EdgeInsets.symmetric(vertical: 20, horizontal: 80),
+                                                alignment: Alignment.center),
                                               child: Text('미션 시작'))
                                           ),
                                         )
@@ -723,19 +748,32 @@ void myDialog(context) {
         // 그림자 높이 elevation: 50,
         insetPadding: const  EdgeInsets.fromLTRB(20,40,20,40),
 
-        child: Container(
-          width: 450,
-          padding: const EdgeInsets.all(30),
-          alignment: Alignment.center,
-          child: SingleChildScrollView( child: Column(
-            children: [
-                SvgPicture.asset('images/face.svg', width: 60),
-                const SizedBox(height: 5),
-                Container(
+        child: Column(
+          children: [
+            Container(
+              width: 450, height: MediaQuery.of(context).size.height -140,
+              //padding: const EdgeInsets.all(30),
+              padding: const EdgeInsets.fromLTRB(30,30,30,15),
+              alignment: Alignment.center,
+              child: SingleChildScrollView( child: Column(
+                children: [
+                  SvgPicture.asset('images/face.svg', width: 60),
+                  const SizedBox(height: 5),
+                  Container(
                     padding: const EdgeInsets.only(top:20),
                     alignment: Alignment.center,
                     child: Column(
                         children: [
+                          Text("Our Instagram !",
+                              style: TextStyle(fontFamily: "PreBd", fontSize: 14, color: Theme.of(context).colorScheme.onBackground, )),
+                          TextButton(
+                            child: Text("@ hey_just_do",
+                            style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Theme.of(context).colorScheme.onBackground,fontStyle: FontStyle.italic, decoration: TextDecoration.underline)),
+                            onPressed: () {
+                              launchUrl(Uri.parse('https://www.instagram.com/hey_just_do?igsh=MWkzNHJteHRjeGI4Zw=='));
+                            },
+                          ),
+                          const SizedBox(height: 18),
                           Text("새해만 되면 여기저기서 올라오는 갓생 인증글들 사이에서 불안함을 느꼈던 적이 있나요? 특히 올해의 ‘띠’라면 왠지 모르게 더 잘 살아야할 것만 같은 부담감이 장난 아니죠.",
                               style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Theme.of(context).colorScheme.onBackground,)),
                           const SizedBox(height: 18),
@@ -746,65 +784,71 @@ void myDialog(context) {
                               style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Theme.of(context).colorScheme.onBackground,))
                         ]
                     ),
-                ),
-                const SizedBox(height: 25),
-                Container(
-                  //width: 380,
-                    padding: const EdgeInsets.all(20),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary.withOpacity(0.3), borderRadius: BorderRadius.circular(15)),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                    Text.rich(
-                    TextSpan(
-                      children: const <TextSpan> [
-                        TextSpan(
-                            text: '· ', style: TextStyle(fontFamily: "PreBd")),
-                        TextSpan(
-                            text: '매일 자정에 '),
-                        TextSpan(
-                            text: '새로운 미션', style: TextStyle(fontFamily: "PreBd")),
-                        TextSpan(
-                            text: '이 공개돼요.'),
-                      ],
-                    style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Theme.of(context).colorScheme.onBackground)), ),
-                      const SizedBox(height: 15),
-                      Text.rich(
-                        TextSpan(
-                          children: const <TextSpan> [
-                            TextSpan(
-                                text: '· 미션 수행 여부는 체크 NO!', style: TextStyle(fontFamily: "PreBd")
-                            ),
-                            TextSpan(
-                                text: ' 혼자 또는 친구와 부담없이 미션을 수행해봐요.')
-                          ],
-                            style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Theme.of(context).colorScheme.onBackground)
-                        ), ),
-                      const SizedBox(height: 15),
-                      Text.rich(
-                        TextSpan(
-                          children: const <TextSpan> [
-                            TextSpan(
-                                text: '· 여러 번 ', style: TextStyle(fontFamily: "PreBd")
-                            ),
-                            TextSpan(
-                                text: '미션에 참여하면 좋은 일이 생길지도?' )
-                          ],
-                            style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Theme.of(context).colorScheme.onBackground)), ),
-                    ]
-                  )
-                ),
-                const SizedBox(height: 20),
-                IconButton(
+                  ),
+                  const SizedBox(height: 25),
+                  Container(
+                    //width: 380,
+                      padding: const EdgeInsets.all(20),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary.withOpacity(0.3), borderRadius: BorderRadius.circular(15)),
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text.rich(
+                              TextSpan(
+                                  children: const <TextSpan> [
+                                    TextSpan(
+                                        text: '· ', style: TextStyle(fontFamily: "PreBd")),
+                                    TextSpan(
+                                        text: '매일 자정에 '),
+                                    TextSpan(
+                                        text: '새로운 미션', style: TextStyle(fontFamily: "PreBd")),
+                                    TextSpan(
+                                        text: '이 공개돼요.'),
+                                  ],
+                                  style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Theme.of(context).colorScheme.onBackground)), ),
+                            const SizedBox(height: 15),
+                            Text.rich(
+                              TextSpan(
+                                  children: const <TextSpan> [
+                                    TextSpan(
+                                        text: '· 미션 수행 여부는 체크 NO!', style: TextStyle(fontFamily: "PreBd")
+                                    ),
+                                    TextSpan(
+                                        text: ' 혼자 또는 친구와 부담없이 미션을 수행해봐요.')
+                                  ],
+                                  style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Theme.of(context).colorScheme.onBackground)
+                              ), ),
+                            const SizedBox(height: 15),
+                            Text.rich(
+                              TextSpan(
+                                  children: const <TextSpan> [
+                                    TextSpan(
+                                        text: '· 여러 번 ', style: TextStyle(fontFamily: "PreBd")
+                                    ),
+                                    TextSpan(
+                                        text: '미션에 참여하면 좋은 일이 생길지도?' )
+                                  ],
+                                  style: TextStyle(fontFamily: "PreRd", fontSize: 16, color: Theme.of(context).colorScheme.onBackground)), ),
+                          ]
+                      )
+                  ),
+                ],
+              )
+              ),
+            ),
+            Container(
+              width: 150,
+                child: IconButton(
                   onPressed: () {
                     Navigator.of(context).pop();
-                  },
-                  icon: const Icon(Icons.close),
-              )
-          ],
-        )       ),
-        )
+                    },
+                      icon: const Icon(Icons.close),
+                    ),
+            )
+
+          ]
+            )
       );
     },
   );
